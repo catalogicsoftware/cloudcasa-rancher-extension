@@ -6,7 +6,9 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@rancher/shell": "^3.0.0"
+    "@kubernetes/client-node": "^0.22.3",
+    "@rancher/shell": "^3.0.0",
+    "axios": "^1.7.9"
   },
   "resolutions": {
     "@types/node": "~20.10.0",
