@@ -1,12 +1,12 @@
 # CloudCasa Rancher Extension 
 
-This extension is built to allow CloudCasa one-click-install and backup statuses. The extension consists of the main extension page and status integration throughout Rancher itsself. 
+This extension is built to allow CloudCasa one-click-install and backup statuses. The extension consists of the main extension page and status integration throughout Rancher. 
 
 ## Installation
 TBD
 
 # Development
-This Rancher Extension is under heavy development. The current process to get things running are listed below, along with links to the the Rancher Extension documentation pages. 
+This Rancher Extension is under heavy development. The current process to get things running are listed below, along with links to the the Rancher Extension/CloudCasa API documentation pages. 
 
 ## Documentation
 [Rancher Extensions](https://extensions.rancher.io/)
