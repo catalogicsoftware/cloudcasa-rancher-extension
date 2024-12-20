@@ -12,51 +12,65 @@ export default {
     return {
       tableHeaders: [
         {
-          name: 'name',
-          label: 'Name',
+          name: 'id',
+          label: 'Cluster',
           value: 'id',
-          width: '25%',
-        },
-        {
-          name: 'hasCloudCasa',
-          label: 'CloudCasa Installed?',
-          value: 'hasCloudCasa',
-          width: '25%',
-        },
-        {
-          name: 'serviceStatus',
-          label: 'CloudCasa Service Status',
-          value: 'serviceStatus',
-          width: '25%',
-        },
-        {
-          name: 'configLink',
-          label: 'CloudCasa Cluster Dashboard',
-          value: 'configLink',
           width: '15%',
+          sort: [
+            "id"
+          ]
+        },
+        {
+          name: 'installState',
+          label: 'State',
+          value: 'installState',
+          width: '15%',
+          sort: [
+            "installState"
+          ]
+        },
+        {
+          name: 'lastUpdated',
+          label: 'Last Updated',
+          value: 'lastUpdated',
+          width: '15%',
+          sort: [
+            "lastUpdated"
+          ]
+        },
+        {
+          name: 'spacing',
+          label: ' ',
+          width: '52%'
         },
         {
           name: 'install',
-          label: 'Install',
-          width: '9%',
+          label: ' ',
+          width: '3%',
         }
-        //Do uninstall as well
       ],
       cloudCasaData: [],
       clusters: [],
       cloudCasaClusterData: [],
+      clusterCount: 0,
     };
   },
+  //Need to split this up
   async mounted() {
     let clusterData = await this.getClusters();
     this.ccClusterData = await this.getCCClusters();
+    this.clusterCount = clusterData.length;
 
     //Add a check to cloud casa to check for backup errors?
     for (let i = 0; i < clusterData.length; i++) { 
       let newCluster = StatusTable;
-      newCluster.hasCloudCasa = false;
-      newCluster.serviceStatus = "Not Installed";
-      newCluster.configLink = "No CC Config Found";
+      newCluster.installState = 1;
+      newCluster.lastUpdated = "No Date Available"
+      //newCluster.configLink = "No CC Config Found";
+
+      if (clusterData[i].metadata.state.name != "active") {
+        continue;
+      }
 
       let clusterServiceData = await this.getClusterData(clusterData[i].id);
 
@@ -66,10 +80,12 @@ export default {
             return data.name == clusterData[i].id;
           });
 
-          newCluster.hasCloudCasa = true;
+
+          newCluster.installState = 3;
+          newCluster.lastUpdated = this.ccClusterData.data._items[index]._updated
           newCluster.serviceStatus = clusterServiceData.data[f].metadata.state.name;
-          newCluster.configLink = "https://home.cloudcasa.io/clusters/overview/" + 
-            this.ccClusterData.data._items[index]._id + "/backups";
+          /*newCluster.configLink = "https://home.cloudcasa.io/clusters/overview/" + 
+            this.ccClusterData.data._items[index]._id + "/backups";*/
           break;
         }
       }
@@ -141,10 +157,13 @@ export default {
 }
 </script>
 <template>
-  <SimpleBox>
+  <div class="main-spacing">
     <div class="header">
       <div class="section sub-header">
         <h1>Clusters</h1>
+        <span class="badge-state role-tertiary ml-20 mr-20 custom-badge-state">
+          {{ clusterCount }}
+        </span>
       </div>
       <div class="section actions">
         <a 
@@ -162,17 +181,23 @@ export default {
         :headers="tableHeaders"
         :search="false"
         :table-actions="false"
-        :row-actions="false"
+        :row-actions="true"
       >
         <template #cell:name="{ row }">
           {{ row.id }}
         </template>
-        <template #cell:hasCloudCasa="{ row }">
-          <div v-if="row.hasCloudCasa === true">
-            <i class="icon-checkmark" />
+        <template #cell:installState="{ row }">
+          <div v-if="row.installState === 1" class="custom-badge gray">
+            Not Paired
           </div>
-          <div v-if="row.hasCloudCasa === false">
-            <i class="icon-x" />
+          <div v-if="row.installState === 2" class="installing-text">
+            Installing...
+          </div>
+          <div v-if="row.installState === 3" class="custom-badge green">
+            Active
+          </div>
+          <div v-if="row.installState === 4" class="custom-badge red">
+            Failed
           </div>
         </template>
         <template #cell:serviceStatus="{ row }">
@@ -189,7 +214,6 @@ export default {
         <template #cell:install="{ row }">
           <button 
             v-bind="{disabled: row.hasCloudCasa != true ? null : true}"
-
             class="btn role-primary" 
             @click="createClusterOnCC(row.id)"
            >
@@ -198,9 +222,15 @@ export default {
         </template>
       </SortableTable>
     </div>
-  </SimpleBox>
+  </div>
 </template>
 <style>
+  :root{
+    --active-green: #5D995D;
+    --failure-red: #F64747;
+    --neutral-gray: #828282;
+  }
+
   .header{
     display: flex;
     margin-bottom: 1rem;
@@ -214,5 +244,71 @@ export default {
 
   .actions a{
     float:right;
-  } 
+  }
+
+  .main-spacing{
+    margin: 2rem;
+  }
+
+  .custom-badge-state{
+    align-items: center;
+    display: inline-flex;
+    padding: 2px 10px 2px 10px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+  }
+
+  tr{
+    th:first-child{
+      padding: 20px 0px 20px 10px !important;
+    }
+
+    th{
+      padding: 20px 0px 20px 0px !important;
+      font-size: 15px;
+      .icon-stack{
+        margin-left: 5px;
+      }
+    }
+
+    td:first-child{
+      padding: 10px 0px 10px 10px !important;
+    }
+
+    td:last-child{
+      padding: 10px 10px 10px 0px !important;
+    }
+
+    td{
+      font-size: 15px;
+      padding: 10px 0px 10px 0px !important;
+    }
+  }
+
+  .installing-text{
+    color: #B6B6C2;
+  }
+
+  .custom-badge{
+    padding: 2px 10px 3px 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .custom-badge.green{
+    border-color: var(--active-green);
+    color: var(--active-green);
+  }
+
+  .custom-badge.gray{
+    border-color: var(--neutral-gray);
+    color: var(--neutral-gray);
+  }
+
+  .custom-badge.red{
+    border-color: var(--failure-red);
+    color: var(--failure-red);
+  }
 </style>

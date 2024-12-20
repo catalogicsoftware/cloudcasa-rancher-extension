@@ -10,13 +10,14 @@ export function init($plugin: IPlugin, store: any) {
     icon: 'monitoring',
     inStore: 'management',
     weight: 100,
+    showClusterSwitcher: false,
     to: {
-      name: `${YOUR_PRODUCT_NAME}-c-cluster`,
-      path: `/${YOUR_PRODUCT_NAME}/c/:cluster/dashboard`,
+      name: `${YOUR_PRODUCT_NAME}`,
+      path: `/${YOUR_PRODUCT_NAME}`,
       params: {
         product: YOUR_PRODUCT_NAME,
-        cluster: BLANK_CLUSTER,
         pkg: YOUR_PRODUCT_NAME,
+        cluster: BLANK_CLUSTER,
       },
     },
   });
