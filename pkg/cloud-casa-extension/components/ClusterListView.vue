@@ -121,6 +121,11 @@ export default {
     return this.cloudCasaData;
   },
   methods: {
+    setInstallState(value, row){
+      console.log("TEST");
+      console.log("HEY", value);
+      row.installState = value;
+    },
     //Need to update methods to listen to changes, right now only page refresh 
     //gets new data.
     async getClusters(){
@@ -146,6 +151,11 @@ export default {
       );
     },
   },
+  computed: {
+    cInstallState(){
+      return this.installState;
+    }
+  }
 }
 </script>
 <template>
@@ -199,8 +209,8 @@ export default {
         </template>
         <template #cell:install="{ row }">
           <InstallButton 
-            :cluster-name="row.id" 
-            :install-state="row.installState" 
+            :row="row" 
+            @data-sent="setInstallState"
           />
         </template>
       </SortableTable>
