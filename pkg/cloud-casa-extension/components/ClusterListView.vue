@@ -1,5 +1,9 @@
 <script>
 import StatusTable from './../models/StatusTable.vue';
+import DashboardButton from './../components/DashboardButton.vue';
+import InstallButton from './../components/InstallButton.vue';
+
+import ActionDropdown from '@shell/components/ActionDropdown';
 import SortableTable from '@shell/components/SortableTable';
 import { MANAGEMENT } from '@shell/config/types';
 import axios from "axios"
@@ -7,6 +11,9 @@ import axios from "axios"
 export default {
   components: {
     SortableTable,
+    DashboardButton,
+    InstallButton,
+    ActionDropdown,
   },
   data() {
     return {
@@ -47,7 +54,25 @@ export default {
           name: 'install',
           label: ' ',
           width: '3%',
-        }
+        },
+      ],
+      tableActions: [
+        {
+          label: 'Edit',
+          icon: 'edit',
+          action: (row) => {
+            // Handle edit action
+            console.log('Edit action for:', row);
+          },
+        },
+        {
+          label: 'Delete',
+          icon: 'delete',
+          action: (row) => {
+            // Handle delete action
+            console.log('Delete action for:', row);
+          },
+        },
       ],
       cloudCasaData: [],
       clusters: [],
@@ -80,7 +105,6 @@ export default {
             return data.name == clusterData[i].id;
           });
 
-
           newCluster.installState = 3;
           newCluster.lastUpdated = this.ccClusterData.data._items[index]._updated
           newCluster.serviceStatus = clusterServiceData.data[f].metadata.state.name;
@@ -89,7 +113,7 @@ export default {
           break;
         }
       }
-     
+    
       newCluster.id = clusterData[i].id;
       this.cloudCasaData.push(newCluster);
     }
@@ -121,38 +145,6 @@ export default {
         }
       );
     },
-    async createClusterOnCC(clusterName){
-      //Adding loading indicator in UI
-      //Need error handling on all calls here
-      //Need to split these up into seperate awaits/chain them
-      const cloudCasaResponse = await axios.post(
-        'https://api.cloudcasa.io/api/v1/kubeclusters',
-        {
-          "name": clusterName,
-          "description": "Created for testing purposes",
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-          }
-        }
-      );
-      return await fetch(cloudCasaResponse.data.status.agentURL).then(
-        response=> response.text()
-      ).then(data => {
-          return this.$store.dispatch('management/request', {
-            url: `/v1/management.cattle.io.clusters/` + clusterName + '?action=apply',
-            method: 'POST',
-            data: {
-              defaultNamespace: "default",
-              yaml: data,
-            }
-          });
-        }
-      );
-    },
   },
 }
 </script>
@@ -165,15 +157,7 @@ export default {
           {{ clusterCount }}
         </span>
       </div>
-      <div class="section actions">
-        <a 
-          href="https://home.cloudcasa.io/dashboard" 
-          class="btn role-primary" 
-          label="Open CloudCasa"
-         >
-          My Dashboard
-        </a>
-      </div>
+      <DashboardButton />
     </div>
     <div v-if="this.cloudCasaData != undefined">
       <SortableTable
@@ -208,17 +192,16 @@ export default {
             {{ row.configLink }}
           </div>
           <div v-if="row.hasCloudCasa === true">
-            <a v-bind:href="row.configLink" target="_Blank">CloudCasa Cluster Dashboard</a>
+            <a v-bind:href="row.configLink" target="_Blank">
+              CloudCasa Cluster Dashboard
+            </a>
           </div>
         </template>
         <template #cell:install="{ row }">
-          <button 
-            v-bind="{disabled: row.hasCloudCasa != true ? null : true}"
-            class="btn role-primary" 
-            @click="createClusterOnCC(row.id)"
-           >
-            Install
-          </button>
+          <InstallButton 
+            :cluster-name="row.id" 
+            :install-state="row.installState" 
+          />
         </template>
       </SortableTable>
     </div>
