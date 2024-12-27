@@ -1,19 +1,30 @@
 <script>
 import StatusTable from './../models/StatusTable.vue';
-import DashboardButton from './../components/DashboardButton.vue';
-import InstallButton from './../components/InstallButton.vue';
+import DashboardButton from './../components/cluster_list_view/DashboardButton.vue';
+import InstallButton from './../components/cluster_list_view/InstallButton.vue';
+import ClusterState from './../components/cluster_list_view/ClusterState.vue';
 
 import ActionDropdown from '@shell/components/ActionDropdown';
 import SortableTable from '@shell/components/SortableTable';
 import { MANAGEMENT } from '@shell/config/types';
-import axios from "axios"
 
+import axios from "axios"
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+ 
 export default {
   components: {
     SortableTable,
     DashboardButton,
     InstallButton,
+    ClusterState,
     ActionDropdown,
+    FontAwesomeIcon,
+  },
+  setup() {
+    return {
+      faTriangleExclamation
+    }
   },
   data() {
     return {
@@ -48,7 +59,12 @@ export default {
         {
           name: 'spacing',
           label: ' ',
-          width: '52%'
+          width: '49%',
+        },
+        {
+          name: 'additionalText',
+          label: ' ',
+          width: '3%',
         },
         {
           name: 'install',
@@ -56,42 +72,21 @@ export default {
           width: '3%',
         },
       ],
-      tableActions: [
-        {
-          label: 'Edit',
-          icon: 'edit',
-          action: (row) => {
-            // Handle edit action
-            console.log('Edit action for:', row);
-          },
-        },
-        {
-          label: 'Delete',
-          icon: 'delete',
-          action: (row) => {
-            // Handle delete action
-            console.log('Delete action for:', row);
-          },
-        },
-      ],
-      cloudCasaData: [],
-      clusters: [],
-      cloudCasaClusterData: [],
+      data: [],
       clusterCount: 0,
     };
   },
   //Need to split this up
   async mounted() {
     let clusterData = await this.getClusters();
-    this.ccClusterData = await this.getCCClusters();
+    let cloudCasaData = await this.getCloudCasaData();
     this.clusterCount = clusterData.length;
 
-    //Add a check to cloud casa to check for backup errors?
     for (let i = 0; i < clusterData.length; i++) { 
       let newCluster = StatusTable;
-      newCluster.installState = 1;
+      newCluster.id = clusterData[i].id;
+      newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
-      //newCluster.configLink = "No CC Config Found";
 
       if (clusterData[i].metadata.state.name != "active") {
         continue;
@@ -100,34 +95,26 @@ export default {
       let clusterServiceData = await this.getClusterData(clusterData[i].id);
 
       for (let f = 0; f < clusterServiceData.data.length; f++) {
-        if (clusterServiceData.data[f].metadata.namespace == "cloudcasa-io") {
-          let index = this.ccClusterData.data._items.findIndex(function(data) {
-            return data.name == clusterData[i].id;
-          });
-
-          newCluster.installState = 3;
-          newCluster.lastUpdated = this.ccClusterData.data._items[index]._updated
-          newCluster.serviceStatus = clusterServiceData.data[f].metadata.state.name;
-          /*newCluster.configLink = "https://home.cloudcasa.io/clusters/overview/" + 
-            this.ccClusterData.data._items[index]._id + "/backups";*/
+        newCluster = this.parseNewCluster(
+          newCluster, 
+          cloudCasaData, 
+          clusterServiceData.data[f],
+        );
+        if (newCluster.installState == 3){
           break;
         }
       }
     
-      newCluster.id = clusterData[i].id;
-      this.cloudCasaData.push(newCluster);
+      this.data.push(newCluster);
     }
 
     return this.cloudCasaData;
   },
   methods: {
     setInstallState(value, row){
-      console.log("TEST");
-      console.log("HEY", value);
       row.installState = value;
     },
     //Need to update methods to listen to changes, right now only page refresh 
-    //gets new data.
     async getClusters(){
       return await this.$store.dispatch(`management/findAll`, {
         type: MANAGEMENT.CLUSTER,
@@ -138,7 +125,7 @@ export default {
         url: `/k8s/clusters/` + cluster + `/v1/services`,
       });
     },
-    async getCCClusters(){
+    async getCloudCasaData(){
       return await axios.get(
         'https://api.cloudcasa.io/api/v1/kubeclusters',
         {
@@ -150,12 +137,31 @@ export default {
         }
       );
     },
-  },
-  computed: {
-    cInstallState(){
-      return this.installState;
+    parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
+      let index = cloudCasaData.data._items.findIndex(function(data) {
+        return data.name == newCluster.id;
+      });
+      
+      if (index == -1) {
+        if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
+          newCluster.installState = 4;
+        }
+      }
+
+      if (index != -1) {
+        newCluster.lastUpdated = cloudCasaData.data._items[index]._updated
+        newCluster.serviceStatus = clusterServiceData.metadata.state.name;
+
+        if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
+          newCluster.installState = 3;
+        }else{
+          newCluster.installState = 1;
+        }
+      }
+      
+      return newCluster;
     }
-  }
+  },
 }
 </script>
 <template>
@@ -169,9 +175,9 @@ export default {
       </div>
       <DashboardButton />
     </div>
-    <div v-if="this.cloudCasaData != undefined">
+    <div v-if="this.data != undefined">
       <SortableTable
-        :rows="this.cloudCasaData"
+        :rows="this.data"
         :headers="tableHeaders"
         :search="false"
         :table-actions="false"
@@ -181,36 +187,28 @@ export default {
           {{ row.id }}
         </template>
         <template #cell:installState="{ row }">
-          <div v-if="row.installState === 1" class="custom-badge gray">
-            Not Paired
-          </div>
-          <div v-if="row.installState === 2" class="installing-text">
-            Installing...
-          </div>
-          <div v-if="row.installState === 3" class="custom-badge green">
-            Active
-          </div>
-          <div v-if="row.installState === 4" class="custom-badge red">
-            Failed
-          </div>
+          <ClusterState :installState="row.installState" />
         </template>
         <template #cell:serviceStatus="{ row }">
           {{ row.serviceStatus[0].toUpperCase() + row.serviceStatus.slice(1) }}
         </template>
-        <template #cell:configLink="{ row }">
-          <div v-if="row.hasCloudCasa === false">
-            {{ row.configLink }}
+        <template #cell:additionalText="{ row }">
+          <div class="yellow-text" v-if="row.installState === 4">
+            <div class="tooltip">
+              <FontAwesomeIcon :icon="faTriangleExclamation" /> Error 
+              <span class="tooltiptext">
+                This agent is not currently found in CloudCasa.
+              </span>
+            </div>
           </div>
-          <div v-if="row.hasCloudCasa === true">
-            <a v-bind:href="row.configLink" target="_Blank">
-              CloudCasa Cluster Dashboard
-            </a>
+          <div class="green-text" v-if="row.installState === 3">
+            ✔ Installed
           </div>
         </template>
         <template #cell:install="{ row }">
           <InstallButton 
             :row="row" 
-            @data-sent="setInstallState"
+            @install-state-func="setInstallState"
           />
         </template>
       </SortableTable>
@@ -222,6 +220,7 @@ export default {
     --active-green: #5D995D;
     --failure-red: #F64747;
     --neutral-gray: #828282;
+    --warning-yellow: #D8A01E;
   }
 
   .header{
@@ -282,26 +281,50 @@ export default {
     color: #B6B6C2;
   }
 
-  .custom-badge{
-    padding: 2px 10px 3px 10px;
-    border-width: 1px;
-    border-style: solid;
-    border-radius: 20px;
+  .green-text{
+    font-size: 20px;
+    color: var(--active-green);
+  }
+  
+  .yellow-text{
+    font-size: 20px;
+    color: var(--warning-yellow);
+  }
+
+  .tooltip {
+    position: relative;
     display: inline-block;
   }
 
-  .custom-badge.green{
-    border-color: var(--active-green);
-    color: var(--active-green);
+  .tooltip .tooltiptext {
+    font-size: 14px;
+    visibility: hidden;
+    width: 160px;
+    background-color: #4A4B52;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+
+    /* Position the tooltip */
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -80px;
   }
 
-  .custom-badge.gray{
-    border-color: var(--neutral-gray);
-    color: var(--neutral-gray);
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
   }
 
-  .custom-badge.red{
-    border-color: var(--failure-red);
-    color: var(--failure-red);
+  .tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: #4A4B52 transparent transparent transparent;
   }
 </style>
