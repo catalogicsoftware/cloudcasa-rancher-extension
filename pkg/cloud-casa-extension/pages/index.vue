@@ -1,5 +1,5 @@
 <script>
-import ClusterListView from "../components/ClusterListView.vue"
+import ClusterListView from "./../components/ClusterListView.vue"
 
 export default {
   components: {

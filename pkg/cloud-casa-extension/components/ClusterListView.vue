@@ -1,6 +1,6 @@
 <script>
 import StatusTable from './../models/StatusTable.vue';
-import DashboardButton from './../components/cluster_list_view/DashboardButton.vue';
+import DashboardButton from './../components/DashboardButton.vue';
 import InstallButton from './../components/cluster_list_view/InstallButton.vue';
 import ClusterState from './../components/cluster_list_view/ClusterState.vue';
 
@@ -51,7 +51,7 @@ export default {
           name: 'lastUpdated',
           label: 'Last Updated',
           value: 'lastUpdated',
-          width: '15%',
+          width: '20%',
           sort: [
             "lastUpdated"
           ]
@@ -59,12 +59,12 @@ export default {
         {
           name: 'spacing',
           label: ' ',
-          width: '49%',
+          width: '40%',
         },
         {
           name: 'additionalText',
           label: ' ',
-          width: '3%',
+          width: '7%',
         },
         {
           name: 'install',
@@ -74,6 +74,7 @@ export default {
       ],
       data: [],
       clusterCount: 0,
+      mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
     };
   },
   //Need to split this up
@@ -173,7 +174,7 @@ export default {
           {{ clusterCount }}
         </span>
       </div>
-      <DashboardButton />
+      <DashboardButton :dashboardLink="this.mainDashboardLink" />
     </div>
     <div v-if="this.data != undefined">
       <SortableTable

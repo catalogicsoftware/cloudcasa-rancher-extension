@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons'
 
 export default {
+  props: {
+    dashboardLink: String,
+  },
   components: {
     FontAwesomeIcon,
   },
@@ -16,7 +19,8 @@ export default {
 <template>
   <div class="section actions">
     <a 
-      href="https://home.cloudcasa.io/dashboard" 
+      v-bind:href="dashboardLink"
+      target="_Blank"
       class="btn role-primary" 
       label="Open CloudCasa"
      >
