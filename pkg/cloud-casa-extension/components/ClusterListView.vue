@@ -79,13 +79,15 @@ export default {
   },
   //Need to split this up
   async mounted() {
+    this.data = [];
     let clusterData = await this.getClusters();
     let cloudCasaData = await this.getCloudCasaData();
     this.clusterCount = clusterData.length;
-
+   
+    console.log(clusterData);
     for (let i = 0; i < clusterData.length; i++) { 
-      let newCluster = StatusTable;
-      newCluster.id = clusterData[i].id;
+      let newCluster = new Object;
+      newCluster.id = clusterData[i].spec.displayName;
       newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
 
@@ -108,8 +110,6 @@ export default {
     
       this.data.push(newCluster);
     }
-
-    return this.cloudCasaData;
   },
   methods: {
     setInstallState(value, row){
