@@ -6,6 +6,7 @@ import ClusterState from './../components/cluster_list_view/ClusterState.vue';
 
 import ActionDropdown from '@shell/components/ActionDropdown';
 import SortableTable from '@shell/components/SortableTable';
+import { BadgeState } from '@components/BadgeState';
 import { MANAGEMENT } from '@shell/config/types';
 
 import axios from "axios"
@@ -16,6 +17,7 @@ export default {
   components: {
     SortableTable,
     DashboardButton,
+    BadgeState,
     InstallButton,
     ClusterState,
     ActionDropdown,
@@ -170,9 +172,7 @@ export default {
     <div class="header">
       <div class="section sub-header">
         <h1>Clusters</h1>
-        <span class="badge-state role-tertiary ml-20 mr-20 custom-badge-state">
-          {{ clusterCount }}
-        </span>
+        <BadgeState color="bg-info" :label="this.clusterCount" />
       </div>
       <DashboardButton :dashboardLink="this.mainDashboardLink" />
     </div>
@@ -241,14 +241,6 @@ export default {
 
   .main-spacing{
     margin: 2rem;
-  }
-
-  .custom-badge-state{
-    align-items: center;
-    display: inline-flex;
-    padding: 2px 10px 2px 10px;
-    border-radius: 20px;
-    border: 1px solid transparent;
   }
 
   tr{

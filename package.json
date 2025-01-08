@@ -7,8 +7,11 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.22.3",
-    "@rancher/shell": "^3.0.0",
-    "axios": "^1.7.9"
+    "@rancher/components": "^0.2.1-alpha.0",
+    "@rancher/shell": "3.0.1",
+    "axios": "^1.7.9",
+    "i": "^0.3.7",
+    "npm": "^11.0.0"
   },
   "resolutions": {
     "@types/node": "~20.10.0",

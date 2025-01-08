@@ -9,7 +9,6 @@ const routes = [
     name: `${YOUR_PRODUCT_NAME}`,
     path: `/${YOUR_PRODUCT_NAME}`,
     component: Dashboard,
-    nav: false,
     meta: {
       product: YOUR_PRODUCT_NAME,
       pkg: YOUR_PRODUCT_NAME,
@@ -20,7 +19,6 @@ const routes = [
     name: `${YOUR_PRODUCT_NAME}-c-cluster`,
     path: `/${YOUR_PRODUCT_NAME}/c/:cluster`,
     component: DetailedCluster,
-    nav: false,
     meta: {
       product: YOUR_PRODUCT_NAME,
       pkg: YOUR_PRODUCT_NAME,

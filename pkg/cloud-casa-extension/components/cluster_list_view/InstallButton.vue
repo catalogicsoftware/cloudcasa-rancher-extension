@@ -160,7 +160,4 @@ export default {
   </button>
 </template>
 <style scoped>
-  button{
-    font-size: 20px;
-  }
 </style>
