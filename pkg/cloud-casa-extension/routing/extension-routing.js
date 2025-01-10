@@ -1,5 +1,5 @@
 import Dashboard from '../pages/index.vue';
-import DetailedCluster from '../pages/detailed-cluster.vue';
+import DetailedCluster from '../pages/DetailedCluster.vue';
 
 const BLANK_CLUSTER = '_';
 const YOUR_PRODUCT_NAME = 'cloud-casa';

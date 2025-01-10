@@ -1,4 +1,5 @@
 <script>
+import { defineComponent } from 'vue';
 import StatusTable from './../models/StatusTable.vue';
 import DashboardButton from './../components/DashboardButton.vue';
 import InstallButton from './../components/cluster_list_view/InstallButton.vue';
@@ -13,7 +14,8 @@ import axios from "axios"
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
  
-export default {
+export default defineComponent({
+  layout: 'home',
   components: {
     SortableTable,
     DashboardButton,
@@ -165,7 +167,7 @@ export default {
       return newCluster;
     }
   },
-}
+})
 </script>
 <template>
   <div class="main-spacing">
