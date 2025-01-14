@@ -96,6 +96,9 @@ export default {
         }
       );
     },
+    async getCloudCasaJobsData() {
+
+    },
     changeTab(evt, tabId) {
       console.log(tabId);
       var i, tabcontent, tablinks;

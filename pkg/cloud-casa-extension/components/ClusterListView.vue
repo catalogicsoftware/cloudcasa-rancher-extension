@@ -1,6 +1,5 @@
 <script>
 import { defineComponent } from 'vue';
-import StatusTable from './../models/StatusTable.vue';
 import DashboardButton from './../components/DashboardButton.vue';
 import InstallButton from './../components/cluster_list_view/InstallButton.vue';
 import ClusterState from './../components/cluster_list_view/ClusterState.vue';
@@ -76,61 +75,57 @@ export default defineComponent({
           width: '3%',
         },
       ],
-      data: [],
-      clusterCount: 0,
+      parsedClusterData: [],
       mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
     };
   },
   //Need to split this up
   async mounted() {
-    this.data = [];
-    let clusterData = await this.getClusters();
-    let cloudCasaData = await this.getCloudCasaData();
-    this.clusterCount = clusterData.length;
-   
-    console.log(clusterData);
-    for (let i = 0; i < clusterData.length; i++) { 
+    this.parsedClusterData = [];
+    let rancherClusterData = await this.getClustersFromRancher();
+    let cloudCasaClusterData = await this.getCloudCasaClusterData();
+
+    for (let i = 0; i < rancherClusterData.length; i++) { 
       let newCluster = new Object;
-      newCluster.id = clusterData[i].spec.displayName;
+      newCluster.id = rancherClusterData[i].spec.displayName;
       newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
 
-      if (clusterData[i].metadata.state.name != "active") {
+      if (rancherClusterData[i].metadata.state.name != "active") {
         continue;
       }
 
-      let clusterServiceData = await this.getClusterData(clusterData[i].id);
+      let rancherClusterServiceData = await this.getClusterServicesFromRancher(
+        rancherClusterData[i].id
+      );
 
-      for (let f = 0; f < clusterServiceData.data.length; f++) {
+      for (let f = 0; f < rancherClusterServiceData.data.length; f++) {
         newCluster = this.parseNewCluster(
           newCluster, 
-          cloudCasaData, 
-          clusterServiceData.data[f],
+          cloudCasaClusterData, 
+          rancherClusterServiceData.data[f],
         );
+
         if (newCluster.installState == 3){
           break;
         }
       }
     
-      this.data.push(newCluster);
+      this.parsedClusterData.push(newCluster);
     }
   },
   methods: {
-    setInstallState(value, row){
-      row.installState = value;
-    },
-    //Need to update methods to listen to changes, right now only page refresh 
-    async getClusters(){
+    async getClustersFromRancher(){
       return await this.$store.dispatch(`management/findAll`, {
         type: MANAGEMENT.CLUSTER,
       });
     },
-    async getClusterData(cluster) {
+    async getClusterServicesFromRancher(cluster){
       return await this.$store.dispatch('cluster/request', {
         url: `/k8s/clusters/` + cluster + `/v1/services`,
       });
     },
-    async getCloudCasaData(){
+    async getCloudCasaClusterData(){
       return await axios.get(
         'https://api.cloudcasa.io/api/v1/kubeclusters',
         {
@@ -142,6 +137,10 @@ export default defineComponent({
         }
       );
     },
+
+    setInstallState(value, row){
+      row.installState = value;
+    },
     parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
       let index = cloudCasaData.data._items.findIndex(function(data) {
         return data.name == newCluster.id;
@@ -151,9 +150,7 @@ export default defineComponent({
         if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
           newCluster.installState = 4;
         }
-      }
-
-      if (index != -1) {
+      }else{
         newCluster.lastUpdated = cloudCasaData.data._items[index]._updated
         newCluster.serviceStatus = clusterServiceData.metadata.state.name;
 
@@ -174,17 +171,17 @@ export default defineComponent({
     <div class="header">
       <div class="section sub-header">
         <h1>Clusters</h1>
-        <BadgeState color="bg-info" :label="this.clusterCount" />
+        <BadgeState color="bg-info" :label="this.parsedClusterData.length" />
       </div>
       <DashboardButton :dashboardLink="this.mainDashboardLink" />
     </div>
-    <div v-if="this.data != undefined">
+    <div v-if="this.parsedClusterData != undefined">
       <SortableTable
-        :rows="this.data"
-        :headers="tableHeaders"
+        :rows="this.parsedClusterData"
+        :headers="this.tableHeaders"
         :search="false"
         :table-actions="false"
-        :row-actions="true"
+        :row-actions="false"
       >
         <template #cell:name="{ row }">
           {{ row.id }}
@@ -219,13 +216,6 @@ export default defineComponent({
   </div>
 </template>
 <style>
-  :root{
-    --active-green: #5D995D;
-    --failure-red: #F64747;
-    --neutral-gray: #828282;
-    --warning-yellow: #D8A01E;
-  }
-
   .header{
     display: flex;
     margin-bottom: 1rem;
@@ -278,12 +268,12 @@ export default defineComponent({
 
   .green-text{
     font-size: 20px;
-    color: var(--active-green);
+    color: var(--success);
   }
   
   .yellow-text{
     font-size: 20px;
-    color: var(--warning-yellow);
+    color: var(--warning);
   }
 
   .tooltip {
