@@ -31,6 +31,42 @@ export default defineComponent({
   },
   data() {
     return {
+      OBSERVABILITY_CRD: {
+        apiVersion: 'apiextensions.k8s.io/v1',
+        kind:       'CustomResourceDefinition',
+        metadata:   { name: 'configurations.cloudcasa.rancher.io' },
+        spec:       {
+          group:    'cloudcasa.rancher.io',
+          versions: [
+            {
+              name:    'v1beta1',
+              served:  true,
+              storage: true,
+              schema:  {
+                openAPIV3Schema: {
+                  type:       'object',
+                  properties: {
+                    spec: {
+                      type:       'object',
+                      properties: {
+                        name:          { type: 'string' },
+                        apiToken:     { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          scope: 'Namespaced',
+          names: {
+            plural:   'configurations',
+            singular: 'configuration',
+            kind:     'Configuration',
+            listKind: 'ConfigurationList',
+          },
+        },
+      },
       tableHeaders: [
         {
           name: 'id',
@@ -81,6 +117,26 @@ export default defineComponent({
   },
   //Need to split this up
   async mounted() {
+    const setRes = await this.$store.dispatch('cloudcasa/setApiToken', "test-token");
+
+    const config = {
+      metadata: { name: `configurations.rancher.io.cloudcasa`, namespace: 'default' },
+      spec:     {
+        apiToken: "testing-CHECK"
+      },
+      type:     "cloudcasa.rancher.io.configuration",
+    };
+
+    let newConfig = await this.$store.dispatch('management/create', config)
+    console.log(newConfig)
+    newConfig.save();
+
+    //If in store we can see it here
+    console.log("from store", this.$store.getters["cloudcasa/apiToken"]);
+
+    let settings = await this.testGetRancherSettings();
+    console.log("from server", settings);
+
     this.parsedClusterData = [];
     let rancherClusterData = await this.getClustersFromRancher();
     let cloudCasaClusterData = await this.getCloudCasaClusterData();
@@ -106,7 +162,7 @@ export default defineComponent({
           rancherClusterServiceData.data[f],
         );
 
-        if (newCluster.installState == 3){
+        if (newCluster.installState == 3) {
           break;
         }
       }
@@ -115,6 +171,25 @@ export default defineComponent({
     }
   },
   methods: {
+    async testGetRancherSettings(){
+      const config = await this.$store.getters['management/schemaFor'](
+        "cloudcasa.rancher.io.configuration"
+      );
+
+      if (config.id === undefined) {
+        await this.$store.dispatch('management/request', {
+          url:    '/v1/apiextensions.k8s.io.customresourcedefinitions',
+          method: 'POST',
+          data:   this.OBSERVABILITY_CRD,
+        });
+      }
+
+      //If not in store, must pull from server
+      return await this.$store.dispatch(
+        'management/findAll', 
+        { type: 'cloudcasa.rancher.io.configuration' },
+      );
+    },
     async getClustersFromRancher(){
       return await this.$store.dispatch(`management/findAll`, {
         type: MANAGEMENT.CLUSTER,

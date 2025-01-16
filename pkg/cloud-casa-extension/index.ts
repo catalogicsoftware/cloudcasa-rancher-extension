@@ -1,7 +1,7 @@
 import { importTypes } from '@rancher/auto-import';
 import { IPlugin } from '@shell/core/types';
 import extensionRouting from './routing/extension-routing';
-
+import cloudcasaStore from './store';
 // Init the package
 export default function(plugin: IPlugin): void {
   // Auto-import model, detail, edit from the folders
@@ -14,4 +14,10 @@ export default function(plugin: IPlugin): void {
   plugin.addProduct(require('./product'));
 
   plugin.addRoutes(extensionRouting)
+
+  plugin.addDashboardStore(
+    cloudcasaStore.config.namespace,
+    cloudcasaStore.specifics,
+    cloudcasaStore.config
+  );
 }
