@@ -117,7 +117,7 @@ export default defineComponent({
   },
   //Need to split this up
   async mounted() {
-    const setRes = await this.$store.dispatch('cloudcasa/setApiToken', "test-token");
+    /*const setRes = await this.$store.dispatch('cloudcasa/setApiToken', "test-token");
 
     const config = {
       metadata: { name: `configurations.rancher.io.cloudcasa`, namespace: 'default' },
@@ -135,7 +135,7 @@ export default defineComponent({
     console.log("from store", this.$store.getters["cloudcasa/apiToken"]);
 
     let settings = await this.testGetRancherSettings();
-    console.log("from server", settings);
+    console.log("from server", settings);*/
 
     this.parsedClusterData = [];
     let rancherClusterData = await this.getClustersFromRancher();
@@ -201,23 +201,27 @@ export default defineComponent({
       });
     },
     async getCloudCasaClusterData(){
-      return await axios.get(
-        'https://api.cloudcasa.io/api/v1/kubeclusters',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-          }
-        }
-      );
-    },
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ process.env.VUE_APP_CLOUDCASA_API_KEY }` 
+      };
+      let method = 'GET';
+      let url = 'meta/proxy/api.cloudcasa.io/api/v1/kubeclusters';
+      const res = await this.$store.dispatch('management/request', {
+        url,
+        method,
+        headers,
+        redirectUnauthorized: false,
+      }, { root: true });
 
+      return res;
+    },
     setInstallState(value, row){
       row.installState = value;
     },
     parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
-      let index = cloudCasaData.data._items.findIndex(function(data) {
+      let index = cloudCasaData._items.findIndex(function(data) {
         return data.name == newCluster.id;
       });
       
@@ -226,7 +230,7 @@ export default defineComponent({
           newCluster.installState = 4;
         }
       }else{
-        newCluster.lastUpdated = cloudCasaData.data._items[index]._updated
+        newCluster.lastUpdated = cloudCasaData._items[index]._updated
         newCluster.serviceStatus = clusterServiceData.metadata.state.name;
 
         if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
