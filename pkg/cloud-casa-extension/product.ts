@@ -9,7 +9,7 @@ export function init($plugin: IPlugin, store: any) {
     configureType,
     product, 
     virtualType,
-    weightType,
+    //weightType,
   } = $plugin.DSL(store, YOUR_PRODUCT_NAME);
 
   product({
@@ -28,7 +28,7 @@ export function init($plugin: IPlugin, store: any) {
     },
   });
 
-  virtualType({
+  /*virtualType({
     name: "Clusters",
     route: {
       name: `${ YOUR_PRODUCT_NAME}`,
@@ -81,6 +81,6 @@ export function init($plugin: IPlugin, store: any) {
   weightType("Replication", 96, true)
 
   basicType("Recovery Points");
-  weightType("Recovery Points", 95, true)
+  weightType("Recovery Points", 95, true)*/
 
 }
