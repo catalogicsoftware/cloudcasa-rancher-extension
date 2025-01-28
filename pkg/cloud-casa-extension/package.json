@@ -1,7 +1,7 @@
 {
   "name": "cloud-casa-extension",
   "description": "cloud-casa-extension plugin",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "rancher": true,
   "scripts": {},

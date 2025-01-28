@@ -44,7 +44,7 @@ export default defineComponent({
           method: 'POST', 
           data: {
             metadata: {
-              name: 'whitelist-domain',
+              name: 'cloudcasa-whitelist-domain',
             },
             value: url,
           },
@@ -65,7 +65,7 @@ export default defineComponent({
       const cloudCasaDriver = nodeDrivers.find(
           (driver) => this.isCloudCasaDriverName(driver.name) 
         ) ||
-          (await this.newNodeDriver(store)
+          (await this.newNodeDriver()
       );
 
       if (!cloudCasaDriver.whitelistDomains) {
@@ -89,7 +89,7 @@ export default defineComponent({
         return false;
       }
     },
-    async newNodeDriver(store){
+    async newNodeDriver(){
       const emptyDriver = {
         name: `cloud-casa`,
         type: 'nodeDriver',
