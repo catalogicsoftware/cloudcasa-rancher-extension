@@ -79,7 +79,7 @@ export default defineComponent({
       }
 
       cloudCasaDriver.state = 'inactive';
-      cloudCasaDriver.url = 'local://';
+      cloudCasaDriver.url = 'https://api.cloudcasa.io';
       cloudCasaDriver.whitelistDomains.push(url);
 
       try {
