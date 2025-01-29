@@ -33,7 +33,7 @@ export default defineComponent({
       );
 
       const setting = whitelist.find(s => s.value === url);
-      
+      console.log(setting);      
       if (setting != undefined) {
         return true;
       }
