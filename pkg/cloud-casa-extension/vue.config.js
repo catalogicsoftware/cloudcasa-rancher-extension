@@ -1,4 +1,5 @@
-const configHelper = require('./shell/vue-config-helper.js');
+const config = require('@rancher/shell/vue.config');
+const configHelper = require('@rancher/shell/vue-config-helper.js');
 
 module.exports = require('./.shell/pkg/vue.config')(__dirname, {
   excludes: [],
