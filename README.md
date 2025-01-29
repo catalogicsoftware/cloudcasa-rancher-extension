@@ -19,7 +19,7 @@ This extension is built to allow CloudCasa one-click-install and backup statuses
    
    b. Select the "Git repository containing Helm chart or cluster template definitions" radio option
       
-   c. Copy the repository link `git@github.com:catalogicsoftware/cloudcasa-rancher-extension.git` and input it into the "Index URL" text input field.
+   c. Copy the repository link `https://github.com/catalogicsoftware/cloudcasa-rancher-extension.git` and input it into the "Index URL" text input field.
    
    d. Select the "Authentication" dropdown and select "none" if not selected already.
    
