@@ -14,12 +14,19 @@ This extension is built to allow CloudCasa one-click-install and backup statuses
 3) Open the dropdown in the top right corner and select "Manage Repositories"
 4) Click the "Create" Button on the top right of the page.
 5) On the Create Repository page enter the following information:
+
    a. Name: cloud-casa-extension
+   
    b. Select the "Git repository containing Helm chart or cluster template definitions" radio option
+   
    c. The next few steps are very important, if you are on a local rancher server for development you will want to use ssh, if you are on a production server with a valid ssl certificate for your domain you can use either https or ssh authentication. !WARNING! by entering your credientials any admin will be able to use these secrets to authenticate to repositories, its best to use a general user for your organization or personal repos. For brevities sake, we wil be using the ssh method in this example.
+   
    d. Copy the repository link `git@github.com:catalogicsoftware/cloudcasa-rancher-extension.git` and input it into the "Index URL" text input field.
+   
    e. Copy your GitHub public and private it key into the Public and Private Key text input fields respectively.
+   
    f. Click the "Create" button in the bottom right of the page.
+   
  6. After being redirected to the Repository management page you should see the repository successfully download. You can now go back to the main "Extension" page, click the "Available" tab, and click "Install".
  7. After the install is complete you may need to reload the page to see the extension appear in the left side bar.
 
