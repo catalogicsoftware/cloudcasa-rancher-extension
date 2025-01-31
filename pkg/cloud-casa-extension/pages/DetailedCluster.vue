@@ -1,9 +1,6 @@
 <script>
-import { MANAGEMENT } from '@shell/config/types';
 import DashboardButton from './../components/DashboardButton.vue';
 import PercentageBar from '@shell/components/PercentageBar';
-import Tab from '@shell/components/Tabbed/Tab';
-import ResourceTabs from '@shell/components/form/ResourceTabs';
 
 import axios from "axios"
 
@@ -12,7 +9,6 @@ export default {
   components: {
     DashboardButton,
     PercentageBar,
-    Tab,
   },
   data() {
     return {
@@ -91,7 +87,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
-            'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
+            //'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
           }
         }
       );
@@ -200,7 +196,7 @@ export default {
       </div>
     </div>
     <div class="m-20"></div>
-    <div class="tab">
+    <!--<div class="tab">
       <button 
         v-for="tab in this.clusterUITabs"
         class="tab-links" 
@@ -215,7 +211,7 @@ export default {
       class="tabcontent"
     >
       {{tab.id}}
-    </div>
+    </div>-->
   </div>
 </template>
 <style scoped>

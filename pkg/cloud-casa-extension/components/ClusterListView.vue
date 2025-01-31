@@ -4,12 +4,10 @@ import DashboardButton from './../components/DashboardButton.vue';
 import InstallButton from './../components/cluster_list_view/InstallButton.vue';
 import ClusterState from './../components/cluster_list_view/ClusterState.vue';
 
-import ActionDropdown from '@shell/components/ActionDropdown';
 import SortableTable from '@shell/components/SortableTable';
 import { BadgeState } from '@components/BadgeState';
 import { MANAGEMENT } from '@shell/config/types';
 
-import axios from "axios"
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
  
@@ -21,7 +19,6 @@ export default defineComponent({
     BadgeState,
     InstallButton,
     ClusterState,
-    ActionDropdown,
     FontAwesomeIcon,
   },
   setup() {

@@ -7,7 +7,7 @@ export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
   try looking at change log or reaching out to Alexandre Alves. Reference this
   GitHub issue: https://github.com/rancher/dashboard/issues/12980*/
-
+  name: 'index-page',
   components: {
     ClusterListView,
   },
@@ -19,7 +19,7 @@ export default defineComponent({
   async mounted() {
     let nodeDriverUp = await this.ensureCloudCasaNodeDriver(this.url);
     let whitelistUp = await this.ensuretGlobalWhitelist(this.url);
-    
+    console.log(nodeDriverUp, whitelistUp); 
     /*use nodeDriverUp, whitelistUp for initial screen, if false, don't allow 
     user forward*/
   },
@@ -33,7 +33,7 @@ export default defineComponent({
       );
 
       const setting = whitelist.find(s => s.value === url);
-      
+      console.log(setting);      
       if (setting != undefined) {
         return true;
       }
@@ -50,6 +50,7 @@ export default defineComponent({
           },
         })
       } catch (e) {
+        console.log(e);
         return false;
       }
 
@@ -78,7 +79,7 @@ export default defineComponent({
       }
 
       cloudCasaDriver.state = 'inactive';
-      cloudCasaDriver.url = 'local://';
+      cloudCasaDriver.url = 'https://api.cloudcasa.io';
       cloudCasaDriver.whitelistDomains.push(url);
 
       try {
@@ -86,6 +87,7 @@ export default defineComponent({
 
         return true;
       } catch (e) {
+        console.log(e);
         return false;
       }
     },
