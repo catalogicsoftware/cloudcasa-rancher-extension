@@ -1,7 +1,8 @@
 <script>
 import { defineComponent } from 'vue';
 import { MANAGEMENT } from '@shell/config/types';
-import ClusterListView from "./../components/ClusterListView.vue"
+import ClusterList from "./../pages/ClusterList.vue"
+import Configurator from "./../pages/Configurator.vue"
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
@@ -9,22 +10,73 @@ export default defineComponent({
   GitHub issue: https://github.com/rancher/dashboard/issues/12980*/
   name: 'index-page',
   components: {
-    ClusterListView,
+    ClusterList,
+    Configurator,
   },
   data() {
     return {
-      url: 'api.cloudcasa.io'
+      url: 'api.cloudcasa.io',
+      name: 'cloud-casa',
+      cloudCasaApiKey: '',
+      hasCloudCasaKeyState: 1, //1 = init state, 2 = no key, 3 = key
+      CC_CRD: {
+        apiVersion: 'apiextensions.k8s.io/v1',
+        kind:       'CustomResourceDefinition',
+        metadata:   { name: 'configurations.cloudcasa.rancher.io' },
+        spec:       {
+          group:    'cloudcasa.rancher.io',
+          versions: [
+            {
+              name:    'v1beta1',
+              served:  true,
+              storage: true,
+              schema:  {
+                openAPIV3Schema: {
+                  type:       'object',
+                  properties: {
+                    spec: {
+                      type:       'object',
+                      properties: {
+                        name:          { type: 'string' },
+                        apiToken:     { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          scope: 'Namespaced',
+          names: {
+            plural:   'configurations',
+            singular: 'configuration',
+            kind:     'Configuration',
+            listKind: 'ConfigurationList',
+          },
+        },
+      },
     }
   },
   async mounted() {
     let nodeDriverUp = await this.ensureCloudCasaNodeDriver(this.url);
     let whitelistUp = await this.ensuretGlobalWhitelist(this.url);
-    console.log(nodeDriverUp, whitelistUp); 
+    
     /*use nodeDriverUp, whitelistUp for initial screen, if false, don't allow 
     user forward*/
-  },
+    console.log(nodeDriverUp, whitelistUp);
 
-  //Probbably need to move all of this to whatever comes of the api key page.
+    //Check for CloudCasa Key
+    const apiKeyResponse = await this.testGetRancherSettings();
+   
+    //Key exists, show cluster list
+    if (apiKeyResponse.length != 0) {
+      this.cloudCasaApiKey = apiKeyResponse[0].spec.apiToken;
+      this.hasCloudCasaKeyState = 3;
+    //Key does not exist, show configurator
+    } else {
+      this.hasCloudCasaKeyState = 2;
+    }
+  },
   methods: {
     async ensuretGlobalWhitelist(url){
       const whitelist = await this.$store.dispatch(
@@ -33,7 +85,7 @@ export default defineComponent({
       );
 
       const setting = whitelist.find(s => s.value === url);
-      console.log(setting);      
+      
       if (setting != undefined) {
         return true;
       }
@@ -93,19 +145,55 @@ export default defineComponent({
     },
     async newNodeDriver(){
       const emptyDriver = {
-        name: `cloud-casa`,
+        name: this.name,
         type: 'nodeDriver',
       };
 
       return await this.$store.dispatch('rancher/create', emptyDriver);
     },
+    async testGetRancherSettings(){
+      //Grab existing configuration
+      const config = await this.$store.getters['management/schemaFor'](
+        "cloudcasa.rancher.io.configuration"
+      );
+
+      //If nothing exists, create a new configuration
+      if (config === undefined) {
+        await this.$store.dispatch('management/request', {
+          url:    '/v1/apiextensions.k8s.io.customresourcedefinitions',
+          method: 'POST',
+          data:   this.CC_CRD,
+        }).catch(function(error){
+          console.log(error);
+        });
+        return [];
+      }
+
+      //return new configuration for key testing
+      return await this.$store.dispatch(
+        'management/findAll', 
+        { type: 'cloudcasa.rancher.io.configuration' },
+      ).catch(function(error){
+        console.log(error);
+      });
+    },
 
     isCloudCasaDriverName(name){
-      return name === 'cloud-casa';
+      return name === this.name;
     },
   },
 })
 </script>
 <template>
-  <ClusterListView />
+  <div v-if="hasCloudCasaKeyState == 3">
+    <ClusterList/>
+  </div>
+  <div v-if="hasCloudCasaKeyState == 2">
+    <Configurator />
+  </div>
+  <div v-if="hasCloudCasaKeyState == 1">
+    <div class="text-center">
+      <h1>Checking For CloudCasa API Key...</h1>
+    </div>
+  </div>
 </template>

@@ -1,7 +1,7 @@
 <script>
-import axios from "axios"
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { CLOUDCASA_URL } from './../../types/types.js';
 
 export default {
   emits: ['install-state-func'],
@@ -15,6 +15,7 @@ export default {
   },
   props: {
     row: Object,
+    cloudCasaApiKey: String,
   },
   data(){
     return {
@@ -30,19 +31,23 @@ export default {
       this.$emit("install-state-func", value, this.row);
     },
     waitForInstallComplete(clusterName){
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
+      };
+      let method = 'GET';
+      let url = CLOUDCASA_URL + 'kubeclusters?where=' + 
+        '{"name":{"$regex":"'+ clusterName +'"}}';
+
       this.ccWaitTimer = setInterval(() => {
-        axios.get(
-          'https://api.cloudcasa.io/api/v1/kubeclusters?where=' + 
-            '{"name":{"$regex":"'+ clusterName +'"}}',
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-              'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-            }
-          }
-        ).then(clusterObject => {
-          let status = clusterObject.data._items[0].status.state;
+        this.$store.dispatch('management/request', {
+          url,
+          method,
+          headers,
+          redirectUnauthorized: false,
+        }, { root: true }).then(clusterObject => {
+          let status = clusterObject._items[0].status.state;
           
           if (status == "ACTIVE"){
             this.localSetInstallState(3)
@@ -64,27 +69,31 @@ export default {
       if (cloudCasaResponse == undefined) {
         return;
       }
-
+      
       return this.installCloudCasaAgent(
         clusterName, 
-        cloudCasaResponse.data.status.agentURL,
+        cloudCasaResponse.status.agentURL,
       );
     },
     async registerClusterOnCloudCasa(clusterName){
-      return await axios.post(
-        'https://api.cloudcasa.io/api/v1/kubeclusters',
-        {
-          "name": clusterName,
-          "description": "Created for testing purposes",
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-          }
-        }
-      ).catch(function(error){
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
+      };
+      let method = 'POST';
+      let url = CLOUDCASA_URL + 'kubeclusters';
+      let body = {
+        "name": clusterName,
+        "description": "Created for testing purposes",
+      };
+      return await this.$store.dispatch('management/request', {
+        url,
+        method,
+        headers,
+        data: body,
+        redirectUnauthorized: false,
+      }, { root: true }).catch(function(error){
         console.log("Failed to create CC cluster:",error);
         this.localSetInstallState(1);
       }.bind(this));
@@ -93,43 +102,58 @@ export default {
     //CloudCasa agent Install 
     async beginCloudCasaAgentInstall(clusterName){
       this.localSetInstallState(2);
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
+      };
+      let method = 'GET';
+      let url = CLOUDCASA_URL + 'kubeclusters?where=' + 
+        '{"name":{"$regex":"'+ clusterName +'"}}';
 
-      return await axios.get(
-        'https://api.cloudcasa.io/api/v1/kubeclusters?where=' + 
-          '{"name":{"$regex":"'+ clusterName +'"}}',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-          }
-        }
-      ).then(clusterObject => {
+      this.$store.dispatch('management/request', {
+        url,
+        method,
+        headers,
+        redirectUnauthorized: false,
+      }, { root: true }).then(clusterObject => {
         this.installCloudCasaAgent(
           clusterName, 
-          clusterObject.data._items[0].status.agentURL,
+          clusterObject._items[0].status.agentURL,
         );
       }).catch(function(error){
-        console.log("Did not find cluster in CloudCasa", error);
+        console.log('Did not find cluster in CloudCasa', error);
         this.localSetInstallState(1);
       }.bind(this));
 
     },
     async installCloudCasaAgent(clusterName, agentURL){
       //Get config file from CloudCasa
-      return await fetch(agentURL).then(
-        response=> response.text()
-      ).then(data => {
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
+      };
+      let method = 'GET';
+      let url = 'meta/proxy/' + agentURL.replace('https://', '');
+
+      this.$store.dispatch('management/request', {
+        url,
+        method,
+        headers,
+        redirectUnauthorized: false,
+      }, { root: true }).then(data => {
           //start listening to CloudCasa API for the install to complete
           this.waitForInstallComplete(clusterName);
 
           //Apply config file to the cluster
           return this.$store.dispatch('management/request', {
-            url: `/v1/management.cattle.io.clusters/` + clusterName + '?action=apply',
+            url: `/v1/management.cattle.io.clusters/` + clusterName + 
+              '?action=apply',
             method: 'POST',
             data: {
               defaultNamespace: "default",
-              yaml: data,
+              yaml: data.data,
             }
           });
       }).catch(function(error){
