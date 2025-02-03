@@ -1,14 +1,13 @@
 <script>
-import DashboardButton from './../components/DashboardButton.vue';
 import PercentageBar from '@shell/components/PercentageBar';
-
-import axios from "axios"
+import ClusterDetailedView from './../components/ClusterDetailedView.vue'
 
 export default {
-  name: 'DetailedCluster',
+  layout: 'plain',
+  name: 'detailed-cluster',
   components: {
-    DashboardButton,
     PercentageBar,
+    ClusterDetailedView,
   },
   data() {
     return {
@@ -45,56 +44,11 @@ export default {
     }
   },
   async mounted() {
-    //document.getElementsByClassName("tab-links")[0].click();
-    this.getClusterId();
-
-    this.cluster = await this.getClusterData(this.clusterId);
-    this.clusterCloudCasaData = await this.getCloudCasaData();
   },
   computed: {
-    installState(){
-      let clusterId = this.$route.params.cluster;
-      let index = -1;
-      if (this.clusterCloudCasaData != null) {
-        index = this.clusterCloudCasaData.data._items.findIndex(function(data) {
-          return data.name == clusterId;
-        });
-      }
 
-      if (index != -1) {
-        return 3;
-      } else {
-        return 4;
-      }
-    }
   },
   methods: {
-    getClusterId() {
-      console.log(this.$route.params.cluster)
-      this.clusterId = this.$route.params.cluster;
-    },
-    async getClusterData(cluster) {
-      console.log(cluster);
-      return await this.$store.dispatch('cluster/request', {
-        url: `/k8s/clusters/` + cluster + `/v1/services`,
-      });
-    },
-    async getCloudCasaData(){
-      return await axios.get(
-        'https://api.cloudcasa.io/api/v1/kubeclusters' + 
-        '?where={"name": {"$regex":"'+ this.$route.params.cluster +'"}}',
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            //'Authorization': process.env.VUE_APP_CLOUDCASA_API_KEY,
-          }
-        }
-      );
-    },
-    async getCloudCasaJobsData() {
-
-    },
     changeTab(evt, tabId) {
       console.log(tabId);
       var i, tabcontent, tablinks;
@@ -117,18 +71,7 @@ export default {
 </script>
 <template>
   <div class="main-spacing">
-    <div class="header">
-      <div class="section sub-header">
-        <h1>{{this.clusterId}}</h1>
-      </div>
-      <DashboardButton :dashboardLink="this.cloudCasaLink" />
-    </div>
-    <div v-if="this.installState === 3" class="custom-badge green">
-      Connection Established
-    </div>
-    <div v-if="this.installState === 4" class="custom-badge red">
-      Not Connected
-    </div>
+    <ClusterDetailedView />
     <br />
     <hr>
     <h1 class="cluster-header">Cluster Metrics</h1>
@@ -315,30 +258,5 @@ export default {
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
-  }
-  
-  .custom-badge{
-    width: fit-content;
-    display: block;
-    margin-bottom: 0.5rem;
-    padding: 2px 10px 3px 10px;
-    border-width: 1px;
-    border-style: solid;
-    border-radius: 20px;
-  }
-
-  .custom-badge.green{
-    border-color: var(--active-green);
-    color: var(--active-green);
-  }
-
-  .custom-badge.gray{
-    border-color: var(--neutral-gray);
-    color: var(--neutral-gray);
-  }
-
-  .custom-badge.red{
-    border-color: var(--failure-red);
-    color: var(--failure-red);
   }
 </style>
