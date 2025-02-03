@@ -3,6 +3,7 @@ import { defineComponent } from 'vue';
 import DashboardButton from './../components/DashboardButton.vue';
 import InstallButton from './../components/cluster_list_view/InstallButton.vue';
 import ClusterState from './../components/cluster_list_view/ClusterState.vue';
+import { CLOUDCASA_URL } from './../types/types.js';
 
 import SortableTable from '@shell/components/SortableTable';
 import { BadgeState } from '@components/BadgeState';
@@ -12,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
  
 export default defineComponent({
-  layout: 'home',
+  layout: 'plain',
   components: {
     SortableTable,
     DashboardButton,
@@ -28,42 +29,6 @@ export default defineComponent({
   },
   data() {
     return {
-      OBSERVABILITY_CRD: {
-        apiVersion: 'apiextensions.k8s.io/v1',
-        kind:       'CustomResourceDefinition',
-        metadata:   { name: 'configurations.cloudcasa.rancher.io' },
-        spec:       {
-          group:    'cloudcasa.rancher.io',
-          versions: [
-            {
-              name:    'v1beta1',
-              served:  true,
-              storage: true,
-              schema:  {
-                openAPIV3Schema: {
-                  type:       'object',
-                  properties: {
-                    spec: {
-                      type:       'object',
-                      properties: {
-                        name:          { type: 'string' },
-                        apiToken:     { type: 'string' },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          ],
-          scope: 'Namespaced',
-          names: {
-            plural:   'configurations',
-            singular: 'configuration',
-            kind:     'Configuration',
-            listKind: 'ConfigurationList',
-          },
-        },
-      },
       tableHeaders: [
         {
           name: 'id',
@@ -110,29 +75,21 @@ export default defineComponent({
       ],
       parsedClusterData: [],
       mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
+      cloudCasaApiKey: '',
     };
   },
   //Need to split this up
   async mounted() {
-    /*const setRes = await this.$store.dispatch('cloudcasa/setApiToken', "test-token");
+    const cloudCasaApiKeyResponse = await this.$store.dispatch(
+      'management/findAll', 
+      { type: 'cloudcasa.rancher.io.configuration' },
+    );
 
-    const config = {
-      metadata: { name: `configurations.rancher.io.cloudcasa`, namespace: 'default' },
-      spec:     {
-        apiToken: "testing-CHECK"
-      },
-      type:     "cloudcasa.rancher.io.configuration",
-    };
-
-    let newConfig = await this.$store.dispatch('management/create', config)
-    console.log(newConfig)
-    newConfig.save();
-
-    //If in store we can see it here
-    console.log("from store", this.$store.getters["cloudcasa/apiToken"]);
-
-    let settings = await this.testGetRancherSettings();
-    console.log("from server", settings);*/
+    if (cloudCasaApiKeyResponse.length != 0) {
+      this.cloudCasaApiKey = cloudCasaApiKeyResponse[0].spec.apiToken;
+    }else{
+      //Fatal error here
+    }
 
     this.parsedClusterData = [];
     let rancherClusterData = await this.getClustersFromRancher();
@@ -168,25 +125,6 @@ export default defineComponent({
     }
   },
   methods: {
-    async testGetRancherSettings(){
-      const config = await this.$store.getters['management/schemaFor'](
-        "cloudcasa.rancher.io.configuration"
-      );
-
-      if (config.id === undefined) {
-        await this.$store.dispatch('management/request', {
-          url:    '/v1/apiextensions.k8s.io.customresourcedefinitions',
-          method: 'POST',
-          data:   this.OBSERVABILITY_CRD,
-        });
-      }
-
-      //If not in store, must pull from server
-      return await this.$store.dispatch(
-        'management/findAll', 
-        { type: 'cloudcasa.rancher.io.configuration' },
-      );
-    },
     async getClustersFromRancher(){
       return await this.$store.dispatch(`management/findAll`, {
         type: MANAGEMENT.CLUSTER,
@@ -201,18 +139,18 @@ export default defineComponent({
       let headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'x-api-auth-header': `Bearer ${ process.env.VUE_APP_CLOUDCASA_API_KEY }` 
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
       };
       let method = 'GET';
-      let url = 'meta/proxy/api.cloudcasa.io/api/v1/kubeclusters';
-      const res = await this.$store.dispatch('management/request', {
+      let url = CLOUDCASA_URL + 'kubeclusters';
+      const cloudCasaResponse = await this.$store.dispatch('management/request', {
         url,
         method,
         headers,
         redirectUnauthorized: false,
       }, { root: true });
 
-      return res;
+      return cloudCasaResponse;
     },
     setInstallState(value, row){
       row.installState = value;
@@ -223,14 +161,14 @@ export default defineComponent({
       });
       
       if (index == -1) {
-        if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
+        if (clusterServiceData.metadata.namespace == 'cloudcasa-io') {
           newCluster.installState = 4;
         }
       }else{
         newCluster.lastUpdated = cloudCasaData._items[index]._updated
         newCluster.serviceStatus = clusterServiceData.metadata.state.name;
 
-        if (clusterServiceData.metadata.namespace == "cloudcasa-io") {
+        if (clusterServiceData.metadata.namespace == 'cloudcasa-io') {
           newCluster.installState = 3;
         }else{
           newCluster.installState = 1;
@@ -238,7 +176,7 @@ export default defineComponent({
       }
       
       return newCluster;
-    }
+    },
   },
 })
 </script>
@@ -247,7 +185,10 @@ export default defineComponent({
     <div class="header">
       <div class="section sub-header">
         <h1>Clusters</h1>
-        <BadgeState color="bg-info" :label="this.parsedClusterData.length" />
+        <BadgeState 
+          color="bg-info" 
+          :label="parsedClusterData.length.toString()" 
+        />
       </div>
       <DashboardButton :dashboardLink="this.mainDashboardLink" />
     </div>
@@ -285,6 +226,7 @@ export default defineComponent({
           <InstallButton 
             :row="row" 
             @install-state-func="setInstallState"
+            :cloudCasaApiKey="cloudCasaApiKey" 
           />
         </template>
       </SortableTable>
