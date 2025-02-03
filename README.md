@@ -1,6 +1,17 @@
 # CloudCasa Rancher Extension 
 
-This extension is built to allow CloudCasa one-click-install and backup statuses. The extension consists of the main extension page and status integration throughout Rancher. 
+The CloudCasa Extension is designed to facilitate seamless one-click installation and monitoring of backup statuses within the Rancher environment. This extension comprises a central management interface and integrated status indicators throughout the Rancher platform.
+
+Key Features of the Current Release:
+1) CloudCasa API Key Storage: Enter your CloudCasa API Key once to allow easy access to the Cluster Management Panel.
+2) Cluster Management Panel: Efficiently manage your cluster list with an intuitive panel that streamlines operations.
+3) One-Click Installation of CloudCasa Agent: Simplify the deployment process with our one-click installation feature, enabling rapid integration of the CloudCasa agent into your cluster.
+
+
+![image](https://github.com/user-attachments/assets/a7e8b5c3-71cb-4ed5-bf81-6f9daf4db7ec)
+![image](https://github.com/user-attachments/assets/fbe9d31a-170c-44eb-adf7-8ef83ffe8138)
+
+
 
 ## Installation
 
