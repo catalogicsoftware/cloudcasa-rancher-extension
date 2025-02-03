@@ -12,9 +12,9 @@ entries:
       catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
     apiVersion: v2
     appVersion: 0.2.2
-    created: "2025-02-03T15:31:54.239360738Z"
+    created: "2025-02-03T15:36:21.566597544Z"
     description: cloud-casa-extension plugin
-    digest: bb36494576c8fb8172e11e4199f268d0ffb95684bc0ac5a6f2033fe268751839
+    digest: 28ff7e18838bcf5089f713fa486426583c222a877c4ed777c32bdec8299ad6ca
     name: cloud-casa-extension
     type: application
     urls:
@@ -77,4 +77,4 @@ entries:
     urls:
     - assets/cloud-casa-extension/cloud-casa-extension-0.1.3.tgz
     version: 0.1.3
-generated: "2025-02-03T15:31:54.23889896Z"
+generated: "2025-02-03T15:36:21.565739523Z"
