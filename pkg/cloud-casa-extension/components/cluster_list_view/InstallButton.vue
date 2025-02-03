@@ -20,7 +20,7 @@ export default {
   data(){
     return {
       ccWaitTimer: null,
-      detailsLink: "/cloud-casa/c/"
+      detailsLink: "/dashboard/cloud-casa/c/"
     }
   },
   methods: {
