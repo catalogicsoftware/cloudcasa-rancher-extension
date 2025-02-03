@@ -1,0 +1,3 @@
+plugin/cloud-casa-extension-0.2.2.umd.min.js
+plugin/cloud-casa-extension-0.2.2.umd.min.js.map
+plugin/package.json
