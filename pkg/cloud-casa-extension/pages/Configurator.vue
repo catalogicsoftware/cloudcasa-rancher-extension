@@ -75,7 +75,7 @@ export default defineComponent({
           { root: true },
         //If the key works against a CloudCasa endpoint, continue to cluster list
         ).then(function(){
-          window.location.href = '../cloud-casa/dashboard';
+          window.location.href = '../cloud-casa';
         //If something is wrong with the key, show the growl
         }).catch(function(error){
           console.log(error);
