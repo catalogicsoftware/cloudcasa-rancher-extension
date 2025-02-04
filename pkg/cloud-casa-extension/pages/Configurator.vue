@@ -18,9 +18,6 @@ export default defineComponent({
       cloudCasaApiKey: ''
     }
   },
-  async mounted() {
-
-  },
   methods: {
     async saveApiKey(){
       let currentConfig;
@@ -75,9 +72,9 @@ export default defineComponent({
           { root: true },
         //If the key works against a CloudCasa endpoint, continue to cluster list
         ).then(function(){
-          window.location.href = '../cloud-casa';
+          this.$router.push("/cloud-casa/dashboard");
         //If something is wrong with the key, show the growl
-        }).catch(function(error){
+        }.bind(this)).catch(function(error){
           console.log(error);
           this.$store.dispatch('growl/error', {
             title: 'Invalid API Key',

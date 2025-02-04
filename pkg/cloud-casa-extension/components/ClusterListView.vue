@@ -10,7 +10,7 @@ import { BadgeState } from '@components/BadgeState';
 import { MANAGEMENT } from '@shell/config/types';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
+import { faTriangleExclamation, faGear } from '@fortawesome/free-solid-svg-icons'
  
 export default defineComponent({
   layout: 'plain',
@@ -24,7 +24,8 @@ export default defineComponent({
   },
   setup() {
     return {
-      faTriangleExclamation
+      faTriangleExclamation,
+      faGear
     }
   },
   data() {
@@ -179,6 +180,10 @@ export default defineComponent({
       
       return newCluster;
     },
+    routeToConfiguratorPage(){
+      console.log("TEST");
+      this.$router.push("/cloud-casa/configurator");
+    }
   },
 })
 </script>
@@ -192,7 +197,17 @@ export default defineComponent({
           :label="parsedClusterData.length.toString()" 
         />
       </div>
-      <DashboardButton :dashboardLink="this.mainDashboardLink" />
+      <div class="section actions">
+        <a
+          @click="routeToConfiguratorPage()"
+          style='font-size: 20px; margin-left: 15px;' 
+          class="btn role-primary" 
+          label="Open CloudCasa"
+         >
+          Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
+        </a>
+        <DashboardButton :dashboardLink="this.mainDashboardLink" />
+      </div>
     </div>
     <div v-if="this.parsedClusterData != undefined">
       <SortableTable
