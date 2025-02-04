@@ -17,16 +17,14 @@ export default {
 }
 </script>
 <template>
-  <div class="section actions">
-    <a 
-      v-bind:href="dashboardLink"
-      target="_Blank"
-      class="btn role-primary" 
-      label="Open CloudCasa"
-     >
-      My Dashboard <FontAwesomeIcon :icon="faArrowUpRightFromSquare" />
-    </a>
-  </div>
+  <a 
+    v-bind:href="dashboardLink"
+    target="_Blank"
+    class="btn role-primary" 
+    label="Open CloudCasa"
+   >
+    My Dashboard <FontAwesomeIcon :icon="faArrowUpRightFromSquare" />
+  </a>
 </template>
 <style scoped>
   svg {

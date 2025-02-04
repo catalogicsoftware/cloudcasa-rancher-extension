@@ -71,10 +71,12 @@ export default defineComponent({
     //Key exists, show cluster list
     if (apiKeyResponse.length != 0) {
       this.cloudCasaApiKey = apiKeyResponse[0].spec.apiToken;
-      this.hasCloudCasaKeyState = 3;
+      this.hasCloudCasaKeyState == 3
+      this.$router.push('/cloud-casa/dashboard');
     //Key does not exist, show configurator
     } else {
-      this.hasCloudCasaKeyState = 2;
+      this.hasCloudCasaKeyState == 2
+      this.$router.push('/cloud-casa/configurator');
     }
   },
   methods: {
@@ -185,12 +187,6 @@ export default defineComponent({
 })
 </script>
 <template>
-  <div v-if="hasCloudCasaKeyState == 3">
-    <ClusterList/>
-  </div>
-  <div v-if="hasCloudCasaKeyState == 2">
-    <Configurator />
-  </div>
   <div v-if="hasCloudCasaKeyState == 1">
     <div class="text-center">
       <h1>Checking For CloudCasa API Key...</h1>
