@@ -33,7 +33,7 @@ export default defineComponent({
         {
           name: 'id',
           label: 'Cluster',
-          value: 'id',
+          value: 'name',
           width: '15%',
           sort: [
             "id"
@@ -72,6 +72,7 @@ export default defineComponent({
           label: ' ',
           width: '3%',
         },
+
       ],
       parsedClusterData: [],
       mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
@@ -97,7 +98,8 @@ export default defineComponent({
 
     for (let i = 0; i < rancherClusterData.length; i++) { 
       let newCluster = new Object;
-      newCluster.id = rancherClusterData[i].spec.displayName;
+      newCluster.id = rancherClusterData[i].id;
+      newCluster.name = rancherClusterData[i].spec.displayName;
       newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
 
@@ -157,7 +159,7 @@ export default defineComponent({
     },
     parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
       let index = cloudCasaData._items.findIndex(function(data) {
-        return data.name == newCluster.id;
+        return data.name == newCluster.name;
       });
       
       if (index == -1) {

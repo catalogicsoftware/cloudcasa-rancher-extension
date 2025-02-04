@@ -24,8 +24,8 @@ export default {
     }
   },
   methods: {
-    getDetailsLink(clusterName){
-      return this.detailsLink + clusterName;
+    getDetailsLink(clusterId){
+      return this.detailsLink + clusterId;
     },
     localSetInstallState(value){
       this.$emit("install-state-func", value, this.row);
@@ -94,7 +94,7 @@ export default {
         data: body,
         redirectUnauthorized: false,
       }, { root: true }).catch(function(error){
-        console.log("Failed to create CC cluster:",error);
+        console.log("Failed to create CC cluster:", error);
         this.localSetInstallState(1);
       }.bind(this));
     },
