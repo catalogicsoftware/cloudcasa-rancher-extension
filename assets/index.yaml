@@ -11,6 +11,25 @@ entries:
       catalog.cattle.io/ui-component: plugins
       catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
     apiVersion: v2
+    appVersion: 0.2.3
+    created: "2025-02-04T21:52:09.754643784Z"
+    description: cloud-casa-extension plugin
+    digest: 09bbcfb520aa1328b8219e1a4be0593357fee78c1c81e6a34ae2a1463c332dc2
+    name: cloud-casa-extension
+    type: application
+    urls:
+    - assets/cloud-casa-extension/cloud-casa-extension-0.2.3.tgz
+    version: 0.2.3
+  - annotations:
+      catalog.cattle.io/certified: rancher
+      catalog.cattle.io/namespace: cattle-ui-plugin-system
+      catalog.cattle.io/os: linux
+      catalog.cattle.io/permits-os: linux, windows
+      catalog.cattle.io/rancher-version: '>= 2.10.0'
+      catalog.cattle.io/scope: management
+      catalog.cattle.io/ui-component: plugins
+      catalog.cattle.io/ui-extensions-version: '>= 3.0.0 < 4.0.0'
+    apiVersion: v2
     appVersion: 0.2.2
     created: "2025-02-03T15:41:28.697364507Z"
     description: cloud-casa-extension plugin
@@ -77,4 +96,4 @@ entries:
     urls:
     - assets/cloud-casa-extension/cloud-casa-extension-0.1.3.tgz
     version: 0.1.3
-generated: "2025-02-03T15:41:28.69660582Z"
+generated: "2025-02-04T21:52:09.754028948Z"
