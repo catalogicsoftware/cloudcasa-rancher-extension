@@ -76,7 +76,7 @@ export default {
     <hr>
     <h1 class="cluster-header">Cluster Metrics</h1>
     <br />
-    <div class="card-container">
+    <!--<div class="card-container">
       <div class="card">
         <h1>Job Success</h1>
         <br />
@@ -137,7 +137,7 @@ export default {
         <br />
         <PercentageBar :modelValue="55" />
       </div>
-    </div>
+    </div>-->
     <div class="m-20"></div>
     <!--<div class="tab">
       <button 
