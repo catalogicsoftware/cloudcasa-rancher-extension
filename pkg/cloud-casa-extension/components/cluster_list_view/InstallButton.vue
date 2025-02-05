@@ -20,7 +20,6 @@ export default {
   data(){
     return {
       ccWaitTimer: null,
-      detailsLink: "/dashboard/cloud-casa/c/"
     }
   },
   methods: {
@@ -157,10 +156,13 @@ export default {
             }
           });
       }).catch(function(error){
-        console.log("Failed to get CC config file:", error);
+        console.log('Failed to get CC config file:', error);
         this.localSetInstallState(4);
       }.bind(this));
     },
+    routeToDetailedPage(id){
+      this.$router.push('/cloud-casa/c/' + id);
+    }
   },
 }
 </script>
@@ -185,7 +187,7 @@ export default {
     </span>
   </button>
   <a
-    :href="this.getDetailsLink(row.id)"
+    @click="this.routeToDetailedPage(row.id)"
     class="btn role-secondary"
     v-if="row.installState === 3"
   >
