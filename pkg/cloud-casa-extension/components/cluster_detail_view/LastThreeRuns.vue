@@ -9,6 +9,11 @@ export default {
     getJobs(){
       let newJobs = new Array();
 
+      if (this.jobs == undefined){
+        newJobs.push(new Object, new Object, new Object);  
+        return newJobs;
+      }
+
       for (let i = 0; i < 3; i++){
         if (this.jobs[i] == undefined) {
           newJobs.push(new Object);

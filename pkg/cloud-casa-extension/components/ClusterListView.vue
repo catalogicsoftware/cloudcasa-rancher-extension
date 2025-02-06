@@ -100,6 +100,7 @@ export default defineComponent({
     for (let i = 0; i < rancherClusterData.length; i++) { 
       let newCluster = new Object;
       newCluster.id = rancherClusterData[i].id;
+      newCluster.cloudCasaId = undefined;
       newCluster.name = rancherClusterData[i].spec.displayName;
       newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
@@ -113,6 +114,22 @@ export default defineComponent({
       );
 
       for (let f = 0; f < rancherClusterServiceData.data.length; f++) {
+
+        if (rancherClusterServiceData.data[f].metadata.namespace == 'cloudcasa-io') {
+          const kubeAgent = await this.$store.dispatch('cluster/request', {
+            url: `/k8s/clusters/` + newCluster.id + `/v1/apps.deployments/cloudcasa-io/kubeagent`,
+          });
+
+          const envVars = kubeAgent.spec.template.spec.containers[0].env;
+
+          envVars.forEach(envVar =>{
+            if (envVar.name == "AMDS_CLUSTER_ID") {
+              console.log(envVar.value);
+              newCluster.cloudCasaId = envVar.value;
+            }
+          })
+        }
+
         newCluster = this.parseNewCluster(
           newCluster, 
           cloudCasaClusterData, 
@@ -160,7 +177,7 @@ export default defineComponent({
     },
     parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
       let index = cloudCasaData._items.findIndex(function(data) {
-        return data.name == newCluster.name;
+        return data._id == newCluster.cloudCasaId;
       });
       
       if (index == -1) {
@@ -181,9 +198,8 @@ export default defineComponent({
       return newCluster;
     },
     routeToConfiguratorPage(){
-      console.log("TEST");
       this.$router.push("/cloud-casa/configurator");
-    }
+    },
   },
 })
 </script>
@@ -244,6 +260,7 @@ export default defineComponent({
             :row="row" 
             @install-state-func="setInstallState"
             :cloudCasaApiKey="cloudCasaApiKey" 
+            :cloudCasaId="row.cloudCasaId"
           />
         </template>
       </SortableTable>

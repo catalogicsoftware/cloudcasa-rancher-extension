@@ -39,7 +39,7 @@ const routes = [
   },
   {
     name: `${YOUR_PRODUCT_NAME}-c-cluster`,
-    path: `/${YOUR_PRODUCT_NAME}/c/:cluster`,
+    path: `/${YOUR_PRODUCT_NAME}/c/:cluster/:ccid`,
     component: DetailedCluster,
     meta: {
       product: YOUR_PRODUCT_NAME,

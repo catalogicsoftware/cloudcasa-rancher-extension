@@ -160,8 +160,8 @@ export default {
         this.localSetInstallState(4);
       }.bind(this));
     },
-    routeToDetailedPage(id){
-      this.$router.push('/cloud-casa/c/' + id);
+    routeToDetailedPage(id, ccid){
+      this.$router.push('/cloud-casa/c/' + id + '/' + ccid);
     }
   },
 }
@@ -187,18 +187,19 @@ export default {
     </span>
   </button>
   <a
-    @click="this.routeToDetailedPage(row.id)"
+    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
     class="btn role-secondary"
     v-if="row.installState === 3"
   >
     View Details
   </a>
-  <button
+  <a
+    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
     class="btn role-secondary"
     v-if="row.installState === 4"
   >
     View Details
-  </button>
+  </a>
 </template>
 <style scoped>
 </style>
