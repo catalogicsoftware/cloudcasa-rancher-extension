@@ -19,6 +19,8 @@ Key Features of the Current Release:
 1) Ensure you are running the Rancher version 2.10.0 or later.
 2) Ensure you have access to an admin user. 
 
+You have three different options to install the CloudCasa Rancher Extension, **you only need to do one of these to use the extension**. 
+
 ### Add a Repository
 1) Log into Rancher.
 2) From the Rancher Dashboard, open the hamburger menu in the top left corner and select "Extensions."
