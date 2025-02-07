@@ -38,7 +38,7 @@ export default {
           name: 'name',
           label: 'Name',
           value: 'name',
-          width: '15%',
+          width: '25%',
           sort: [
             "name"
           ]
@@ -73,7 +73,7 @@ export default {
         {
           name: 'spacing',
           label: ' ',
-          width: '30%',
+          width: '20%',
         },
         {
           name: 'additionalText',
@@ -92,7 +92,7 @@ export default {
           name: 'name',
           label: 'Restore Name',
           value: 'name',
-          width: '25%',
+          width: '35%',
           sort: [
             "name"
           ]
@@ -109,7 +109,7 @@ export default {
         {
           name: 'spacing',
           label: ' ',
-          width: '45%',
+          width: '35%',
         },
         {
           name: 'additionalText',
@@ -202,7 +202,7 @@ export default {
         }
 
         let newJobset = new Object;
-        newJobset.id = cloudCasaRestoreData._items[i].id;
+        newJobset.id = cloudCasaRestoreData._items[i]._id;
         newJobset.restoreLink = 'https://home.cloudcasa.io/clusters/restores/' + 
           cloudCasaRestoreData._items[i]._id + '/activity';
         newJobset.name = cloudCasaRestoreData._items[i].name;

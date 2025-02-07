@@ -134,37 +134,43 @@ export default {
 }
 </script>
 <template>
-  <div style="float: left; cursor: pointer;" @click="this.routeToMainPage()">
-    <FontAwesomeIcon 
-      :icon="faArrowLeft"
-      size="2x"
-    />
-    <span style="font-size: 26px;"> Back To Cluster List</span>
-  </div>
-  <div class="m-15"></div>
-  <div class="header">
-    <div class="section sub-header">
-      <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
+  <div class="center-all">
+    <div class="max-width">
+      <a 
+        @click="this.routeToMainPage()"
+        target="_Blank"
+        class="btn role-primary" 
+        label="Cluster List"
+       >
+        <FontAwesomeIcon :icon="faArrowLeft" /> Back To Cluster List
+      </a>
+      <div style="display: inline-block"></div>
+      <div class="m-25"></div>
+      <div class="header">
+        <div class="section sub-header">
+          <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
+        </div>
+        <div class="section actions">
+          <DashboardButton :dashboardLink="this.cloudCasaLink" />
+        </div>
+      </div>
+      <div v-if="this.installState === 3" class="custom-badge green">
+        Connection Established
+      </div>
+      <div v-if="this.installState === 4" class="custom-badge red">
+        Not Connected
+      </div>
+      <h1 class="cluster-header">Cluster Metrics (Last 7 Days)</h1>
+      <div class="m-5"></div>
+      <CoverageCards :clusterCloudCasaData="this.clusterCloudCasaData" />
+      <div class="m-20"></div>
+      <div v-if="this.cloudCasaClusterId != 'Loading...'">
+        <JobsTable :cloudCasaClusterId="this.cloudCasaClusterId" />
+      </div>
+      <div v-else>
+        Loading Jobs...
+      </div>
     </div>
-    <div class="section actions">
-      <DashboardButton :dashboardLink="this.cloudCasaLink" />
-    </div>
-  </div>
-  <div v-if="this.installState === 3" class="custom-badge green">
-    Connection Established
-  </div>
-  <div v-if="this.installState === 4" class="custom-badge red">
-    Not Connected
-  </div>
-  <h1 class="cluster-header">Cluster Metrics (Last 7 Days)</h1>
-  <div class="m-5"></div>
-  <CoverageCards :clusterCloudCasaData="this.clusterCloudCasaData" />
-  <div class="m-20"></div>
-  <div v-if="this.cloudCasaClusterId != 'Loading...'">
-    <JobsTable :cloudCasaClusterId="this.cloudCasaClusterId" />
-  </div>
-  <div v-else>
-    Loading Jobs...
   </div>
 </template>
 <style>
@@ -174,6 +180,25 @@ export default {
     --neutral-gray: #828282;
     --light-gray: #B6B6C2;
     --warning-yellow: #D8A01E;
+  }
+  
+  svg {
+    margin-right: 10px;
+  }
+
+  a{
+    font-size: 20px;
+  }
+
+  .center-all{
+    width: 100%;
+  }
+
+  .max-width{
+    width: 1440px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;  
   }
 
   .light-gray{

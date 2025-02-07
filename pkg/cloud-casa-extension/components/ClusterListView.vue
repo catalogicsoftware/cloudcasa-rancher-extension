@@ -35,7 +35,7 @@ export default defineComponent({
           name: 'id',
           label: 'Cluster',
           value: 'name',
-          width: '15%',
+          width: '30%',
           sort: [
             "id"
           ]
@@ -61,12 +61,12 @@ export default defineComponent({
         {
           name: 'spacing',
           label: ' ',
-          width: '40%',
+          width: '22%',
         },
         {
           name: 'additionalText',
           label: ' ',
-          width: '7%',
+          width: '10%',
         },
         {
           name: 'install',
@@ -78,10 +78,12 @@ export default defineComponent({
       parsedClusterData: [],
       mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
       cloudCasaApiKey: '',
+      loadingClusters: false,
     };
   },
   //Need to split this up
   async mounted() {
+    this.loadingClusters = true;
     const cloudCasaApiKeyResponse = await this.$store.dispatch(
       'management/findAll', 
       { type: 'cloudcasa.rancher.io.configuration' },
@@ -90,7 +92,10 @@ export default defineComponent({
     if (cloudCasaApiKeyResponse.length != 0) {
       this.cloudCasaApiKey = cloudCasaApiKeyResponse[0].spec.apiToken;
     }else{
-      //Fatal error here
+      this.$store.dispatch('growl/error', {
+        title: 'Invalid API Key',
+        message: `Make sure your CloudCasa API Key is set.`,
+      }, { root: true });
     }
 
     this.parsedClusterData = [];
@@ -143,6 +148,7 @@ export default defineComponent({
     
       this.parsedClusterData.push(newCluster);
     }
+    this.loadingClusters = false;
   },
   methods: {
     async getClustersFromRancher(){
@@ -204,70 +210,90 @@ export default defineComponent({
 })
 </script>
 <template>
-  <div class="main-spacing">
-    <div class="header">
-      <div class="section sub-header">
-        <h1>Clusters</h1>
-        <BadgeState 
-          color="bg-info" 
-          :label="parsedClusterData.length.toString()" 
-        />
-      </div>
-      <div class="section actions">
-        <a
-          @click="routeToConfiguratorPage()"
-          style='font-size: 20px; margin-left: 15px;' 
-          class="btn role-primary" 
-          label="Open CloudCasa"
-         >
-          Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
-        </a>
-        <DashboardButton :dashboardLink="this.mainDashboardLink" />
-      </div>
-    </div>
-    <div v-if="this.parsedClusterData != undefined">
-      <SortableTable
-        :rows="this.parsedClusterData"
-        :headers="this.tableHeaders"
-        :search="false"
-        :table-actions="false"
-        :row-actions="false"
-      >
-        <template #cell:name="{ row }">
-          {{ row.id }}
-        </template>
-        <template #cell:installState="{ row }">
-          <ClusterState :installState="row.installState" />
-        </template>
-        <template #cell:serviceStatus="{ row }">
-          {{ row.serviceStatus[0].toUpperCase() + row.serviceStatus.slice(1) }}
-        </template>
-        <template #cell:additionalText="{ row }">
-          <div class="yellow-text" v-if="row.installState === 4">
-            <div class="tooltip">
-              <FontAwesomeIcon :icon="faTriangleExclamation" /> Error 
-              <span class="tooltiptext">
-                This agent is not currently found in CloudCasa.
-              </span>
+  <div class="center-all">
+    <div class="max-width">
+      <div class="main-spacing">
+        <div class="header">
+          <div class="section sub-header">
+            <h1>Clusters</h1>
+            <div v-if="!this.loadingClusters">
+              <BadgeState 
+                color="bg-info" 
+                :label="parsedClusterData.length.toString()" 
+              />
             </div>
           </div>
-          <div class="green-text" v-if="row.installState === 3">
-            ✔ Installed
+          <div class="section actions">
+            <a
+              @click="routeToConfiguratorPage()"
+              style='font-size: 20px; margin-left: 15px;' 
+              class="btn role-primary" 
+              label="Open CloudCasa"
+             >
+              Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
+            </a>
+            <DashboardButton :dashboardLink="this.mainDashboardLink" />
           </div>
-        </template>
-        <template #cell:install="{ row }">
-          <InstallButton 
-            :row="row" 
-            @install-state-func="setInstallState"
-            :cloudCasaApiKey="cloudCasaApiKey" 
-            :cloudCasaId="row.cloudCasaId"
-          />
-        </template>
-      </SortableTable>
+        </div>
+        <div v-if="!this.loadingClusters">
+          <SortableTable
+            :rows="this.parsedClusterData"
+            :headers="this.tableHeaders"
+            :search="false"
+            :table-actions="false"
+            :row-actions="false"
+          >
+            <template #cell:name="{ row }">
+              {{ row.id }}
+            </template>
+            <template #cell:installState="{ row }">
+              <ClusterState :installState="row.installState" />
+            </template>
+            <template #cell:serviceStatus="{ row }">
+              {{ row.serviceStatus[0].toUpperCase() + row.serviceStatus.slice(1) }}
+            </template>
+            <template #cell:additionalText="{ row }">
+              <div class="yellow-text" v-if="row.installState === 4">
+                <div class="tooltip">
+                  <FontAwesomeIcon :icon="faTriangleExclamation" /> Error 
+                  <span class="tooltiptext">
+                    This agent is not currently found in CloudCasa.
+                  </span>
+                </div>
+              </div>
+              <div class="green-text" v-if="row.installState === 3">
+                ✔ Installed
+              </div>
+            </template>
+            <template #cell:install="{ row }">
+              <InstallButton 
+                :row="row" 
+                @install-state-func="setInstallState"
+                :cloudCasaApiKey="cloudCasaApiKey" 
+                :cloudCasaId="row.cloudCasaId"
+              />
+            </template>
+          </SortableTable>
+        </div>
+        <div class="text-center" v-else>
+          <h3>Loading...</h3>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <style>
+  .center-all{
+    width: 100%;
+  }
+
+  .max-width{
+    width: 1440px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;  
+  }
+
   .header{
     display: flex;
     margin-bottom: 1rem;
