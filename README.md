@@ -1,15 +1,17 @@
 # CloudCasa Rancher Extension 
-
-The CloudCasa Extension is designed to facilitate seamless one-click installation and monitoring of backup statuses within the Rancher environment. This extension comprises a central management interface and integrated status indicators throughout the Rancher platform.
+The CloudCasa Extension is designed to facilitate seamless one-click installation and monitoring of backup statuses within the Rancher environment. This extension features a central management interface and integrated status indicators throughout the Rancher platform.
 
 Key Features of the Current Release:
-1) CloudCasa API Key Storage: Enter your CloudCasa API Key once to allow easy access to the Cluster Management Panel.
-2) Cluster Management Panel: Efficiently manage your cluster list with an intuitive panel that streamlines operations.
-3) One-Click Installation of CloudCasa Agent: Simplify the deployment process with our one-click installation feature, enabling rapid integration of the CloudCasa agent into your cluster.
+1) **CloudCasa API Key Storage:** Enter your CloudCasa API Key once to enable easy access to the Cluster Management Panel.
+2) **Cluster Management Panel:** Efficiently manage your cluster list with an intuitive panel that streamlines operations.
+3) **One-Click Installation of CloudCasa Agent:** Simplify the deployment process with our one-click installation feature, allowing for rapid integration of the CloudCasa agent into your cluster.
+4) **Cluster Detail Page:** View recent CloudCasa jobs, check coverage status, and quickly navigate to CloudCasa cluster pages.
 
 
-![image](https://github.com/user-attachments/assets/a7e8b5c3-71cb-4ed5-bf81-6f9daf4db7ec)
-![image](https://github.com/user-attachments/assets/fbe9d31a-170c-44eb-adf7-8ef83ffe8138)
+<p align="middle">
+   <img src="https://github.com/user-attachments/assets/48b1fda8-cd40-4831-9179-876bccd01c5c" />
+   <img src="https://github.com/user-attachments/assets/47a79e5b-ecb5-46c1-bb7c-5113847c5ece" />
+</p>
 
 ## Installation
 
@@ -19,57 +21,58 @@ Key Features of the Current Release:
 
 ### Add a Repository
 1) Log into Rancher.
-2) From the Rancher Dashboard, open the hamburger menu in the top left corner, and select "Extensions".
-3) Open the dropdown in the top right corner and select "Manage Repositories"
-4) Click the "Create" Button on the top right of the page.
-5) On the Create Repository page enter the following information:
+2) From the Rancher Dashboard, open the hamburger menu in the top left corner and select "Extensions."
+3) Open the dropdown in the top right corner and select "Manage Repositories."
+4) Click the "Create" button in the top right corner of the page.
+5) On the Create Repository page, enter the following information:
 
    a. Name: cloud-casa-extension
-   
-   b. Select the "Git repository containing Helm chart or cluster template definitions" radio option
-      
-   c. Copy the repository link `https://github.com/catalogicsoftware/cloudcasa-rancher-extension.git` and input it into the "Git Repo URL" text input field.
-   
-   d. Select the "Authentication" dropdown and select "none" if not selected already.
-   
-   e. Click the "Create" button in the bottom right of the page.
-   
- 6. After being redirected to the Repository management page you should see the repository successfully download. You can now go back to the main "Extension" page, click the "Available" tab, and click "Install".
- 7. After the install is complete you may need to reload the page to see the extension appear in the left side bar.
+
+   b. Select the "Git repository containing Helm chart or cluster template definitions" radio option.
+
+   c. Copy the repository link `https://github.com/catalogicsoftware/cloudcasa-rancher-extension.git` and paste it into the "Git Repo URL" text input field.
+
+   d. Select the "Authentication" dropdown and choose "none" if it is not already selected.
+
+   e. Click the "Create" button in the bottom right corner of the page.
+
+7) After being redirected to the Repository Management page, you should see the repository downloading successfully. You can now return to the main "Extensions" page, click the "Available" tab, and then click "Install."
+8) Once the installation is complete, you may need to reload the page to see the extension appear in the left sidebar.
+
 
 ### Using an index genereate by Helm
 1) Log into Rancher.
-2) From the Rancher Dashboard, open the hamburger menu in the top left corner, and select "Extensions".
-3) Open the dropdown in the top right corner and select "Manage Repositories"
-4) Click the "Create" Button on the top right of the page.
-5) On the Create Repository page enter the following information:
+2) From the Rancher Dashboard, open the hamburger menu in the top left corner and select "Extensions."
+3) Open the dropdown in the top right corner and select "Manage Repositories."
+4) Click the "Create" button in the top right corner of the page.
+5) On the Create Repository page, enter the following information:
 
    a. Name: cloud-casa-extension
-   
-   b. Select the "http(s) URL to an index generated by Helm" radio option
-      
-   c. Copy the repository link `https://catalogicsoftware.github.io/cloudcasa-rancher-extension/` and input it into the "Index URL" text input field.
-   
-   d. Select the "Authentication" dropdown and select "none" if not selected already.
-   
-   e. Click the "Create" button in the bottom right of the page.
-   
- 6. After being redirected to the Repository management page you should see the repository successfully download. You can now go back to the main "Extension" page, click the "Available" tab, and click "Install".
- 7. After the install is complete you may need to reload the page to see the extension appear in the left side bar.
+
+   b. Select the "http(s) URL to an index generated by Helm" radio option.
+
+   c. Copy the repository link https://catalogicsoftware.github.io/cloudcasa-rancher-extension/ and paste it into the "Index URL" text input field.
+
+   d. Select the "Authentication" dropdown and choose "none" if it is not already selected.
+
+   e. Click the "Create" button in the bottom right corner of the page.
+
+7) After being redirected to the Repository Management page, you should see the repository downloading successfully. You can now return to the main "Extensions" page, click the "Available" tab, and then click "Install."
+8) Once the installation is complete, you may need to reload the page to see the extension appear in the left sidebar.
 
 ### Using Developer Load
-1) Another way to locally test the extension is to utilize the "Developer Load" feature. This can be enabled by going to your user "Preferences" page. This can be achieved by clicking the user icon in the top right of the page, and selecting Preferences.
-2) Once the page loads fine the `Enable Extension developer features` checkbox and select it.
-3) Now go to the extensions page and select the dropdown and select "Developer Load" option.
-4) Lets prepare the repository, first clone the repository on the release tag you want to use. In this example were using tag `0.1.3`.
-5) If you have not set up the development environment, its recommended to follow the "Development" section in this readme first.
-6) Once the repository is cloned and your development enviroment is setup, run `yarn build cloud-casa-extension`
-7) Once the build is complete, run the command `yarn serve-pkgs`.
-8) Now that the extension is being served head over to Rancher where you have the "Developer Load" page open, and paste in the the following command into the "Extension URL" text input field.`http://127.0.0.1:4500/cloud-casa-extension-0.1.3/cloud-casa-extension-0.1.3.umd.min.js
-`
-9) Then enter `cloud-casa-extension-0.1.3` into the "Extension module name" text input field if it doesn't autofill.
-10) Click the "Load" button in the bottom right of the modal.
-11) You should see a success message and the extension icon will automatically appear in the bottom left of Rancher navigation sidebar. 
+1) Instructions for Locally Testing the Extension Using the Developer Load Feature:
+2) Another way to locally test the extension is by utilizing the "Developer Load" feature. This can be enabled by navigating to your user "Preferences" page. To do this, click the user icon in the top right corner of the page and select "Preferences."
+3) Once the page loads, check the "Enable Extension Developer Features" checkbox and select it.
+4) Next, go to the Extensions page, open the dropdown, and select the "Developer Load" option.
+5) To prepare the repository, first clone the repository at the release tag you want to use. In this example, we are using tag 0.1.3.
+6) If you have not set up the development environment, it is recommended to follow the "Development" section in this README first.
+7) Once the repository is cloned and your development environment is set up, run the command: `yarn build-pkgs cloud-casa-extension`.
+8) After the build is complete, run the following command: `yarn serve-pkgs`.
+9) Now that the extension is being served, head over to Rancher where you have the "Developer Load" page open, and paste the following command into the "Extension URL" text input field: `http://127.0.0.1:4500/cloud-casa-extension-0.1.3/cloud-casa-extension-0.1.3.umd.min.js`.
+10) Then, enter `cloud-casa-extension-0.1.3` into the "Extension Module Name" text input field if it does not autofill.
+11) Click the "Load" button in the bottom right corner of the modal.
+12) You should see a success message, and the extension icon will automatically appear in the bottom left of the Rancher navigation sidebar.
 
 # Development
 This Rancher Extension is under heavy development. The current process to get things running are listed below, along with links to the the Rancher Extension/CloudCasa API documentation pages. 
