@@ -1,5 +1,7 @@
 <script>
 import { defineComponent } from 'vue';
+
+import { Banner } from '@components/Banner';
 import SimpleBox from '@shell/components/SimpleBox';
 import { LabeledInput } from '@components/Form/LabeledInput';
 import { CLOUDCASA_URL } from './../types/types.js';
@@ -10,6 +12,7 @@ export default defineComponent({
   GitHub issue: https://github.com/rancher/dashboard/issues/12980*/
   name: "configurator-page",
   components: {
+    Banner,
     SimpleBox,
     LabeledInput
   },
@@ -97,38 +100,59 @@ export default defineComponent({
 })
 </script>
 <template>
-  <div class="flex-box">
-    <div class="flex-item">
-      <SimpleBox class="simplebox-centering" style="text-align: center;">
-        <img src="https://cloudcasa.io/assets/logo-white-1.png" />
-        <h1>Welcome to the CloudCasa Extension!</h1>
-        <h3>In order to get started you will need a CloudCasa API Key. To set 
-          that up follow 
-          <a href="https://docs.cloudcasa.io/help/apikeys.html">this guide</a>.
-        </h3>
-      </SimpleBox>
-    </div>
-    <div class="flex-item">
-      <SimpleBox class="simplebox-centering">
-         <LabeledInput 
-          class="key-input"
-          type="text" 
-          v-model:value="cloudCasaApiKey"
-          required
-        >
-          <template #label>CloudCasa API Key</template>
-        </LabeledInput>
-        <button
-          class="btn role-primary btn-save-api-key"
-          @click="saveApiKey()"
-        >
-          Save API Key
-        </button>
-      </SimpleBox>
+  <div class="center-all">
+    <div class="max-width">
+      <Banner
+        color="warning"
+        label="This Rancher Extension can be installed and managed by anyone with admin access. Please ensure that only trusted administrators are granted access, and regularly monitor the extension's usage and settings for unauthorized changes."
+      />
+      <div class="flex-box">
+        <div class="flex-item">
+          <SimpleBox class="simplebox-centering" style="text-align: center;">
+            <img src="https://cloudcasa.io/assets/logo-white-1.png" />
+            <h1>Welcome to the CloudCasa Extension!</h1>
+            <h3>In order to get started you will need a CloudCasa API Key. To set 
+              that up follow 
+              <a href="https://docs.cloudcasa.io/help/apikeys.html">this guide</a>.
+            </h3>
+          </SimpleBox>
+        </div>
+        <div class="flex-item">
+          <SimpleBox class="simplebox-centering">
+             <LabeledInput 
+              class="key-input"
+              type="text" 
+              v-model:value="cloudCasaApiKey"
+              required
+            >
+              <template #label>CloudCasa API Key</template>
+            </LabeledInput>
+            <button
+              class="btn role-primary btn-save-api-key"
+              @click="saveApiKey()"
+            >
+              Save API Key
+            </button>
+          </SimpleBox>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 <style scoped>
+  .center-all{
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  .max-width{
+    width: 1440px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   .flex-box{
     display: flex;
     flex-direction: row;
@@ -140,7 +164,7 @@ export default defineComponent({
   }
 
   .simplebox-centering{
-    height: 93vh;
+    height: 45vh;
     margin: 1rem;
     display: flex; 
     align-items: center;
@@ -148,7 +172,8 @@ export default defineComponent({
   }
   
   .key-input{
-    width: 75rem;
+    display: block;
+    width: 700px;
   }
 
   .btn-save-api-key{

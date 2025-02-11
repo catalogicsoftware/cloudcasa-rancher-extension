@@ -20,12 +20,11 @@ export default {
   data(){
     return {
       ccWaitTimer: null,
-      detailsLink: "/dashboard/cloud-casa/c/"
     }
   },
   methods: {
-    getDetailsLink(clusterName){
-      return this.detailsLink + clusterName;
+    getDetailsLink(clusterId){
+      return this.detailsLink + clusterId;
     },
     localSetInstallState(value){
       this.$emit("install-state-func", value, this.row);
@@ -94,7 +93,7 @@ export default {
         data: body,
         redirectUnauthorized: false,
       }, { root: true }).catch(function(error){
-        console.log("Failed to create CC cluster:",error);
+        console.log("Failed to create CC cluster:", error);
         this.localSetInstallState(1);
       }.bind(this));
     },
@@ -157,10 +156,13 @@ export default {
             }
           });
       }).catch(function(error){
-        console.log("Failed to get CC config file:", error);
+        console.log('Failed to get CC config file:', error);
         this.localSetInstallState(4);
       }.bind(this));
     },
+    routeToDetailedPage(id, ccid){
+      this.$router.push('/cloud-casa/c/' + id + '/' + ccid);
+    }
   },
 }
 </script>
@@ -185,18 +187,19 @@ export default {
     </span>
   </button>
   <a
-    :href="this.getDetailsLink(row.id)"
+    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
     class="btn role-secondary"
     v-if="row.installState === 3"
   >
     View Details
   </a>
-  <button
+  <a
+    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
     class="btn role-secondary"
     v-if="row.installState === 4"
   >
     View Details
-  </button>
+  </a>
 </template>
 <style scoped>
 </style>

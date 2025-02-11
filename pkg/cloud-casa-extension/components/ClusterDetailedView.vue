@@ -1,33 +1,64 @@
 <script>
 import DashboardButton from './../components/DashboardButton.vue';
+import JobsTable from './../components/cluster_detail_view/JobsTable.vue';
+import CoverageCards from './../components/cluster_detail_view/CoverageCards.vue';
+
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+
+import Tabbed from '@shell/components/Tabbed';
+import Tab from '@shell/components/Tabbed/Tab';
+import SortableTable from '@shell/components/SortableTable';
+
 import { CLOUDCASA_URL } from './../types/types.js';
+import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { MANAGEMENT } from '@shell/config/types';
 
 export default {
   layout: 'plain',
   name: 'detailed-cluster-view',
   components: {
+    FontAwesomeIcon,
     DashboardButton,
+    JobsTable,
+    CoverageCards,
+    SortableTable,
+    Tabbed,
+    Tab,
+  },
+  setup(){
+    return {
+      faArrowLeft
+    }
   },
   data() {
     return {
       cluster: null,
+      ccid: null,
+      clusterServices: null,
       clusterCloudCasaData: null,
     }
   },
   async mounted() {
-    //document.getElementsByClassName("tab-links")[0].click();
+    this.cluster = await this.getCluster(this.clusterId);
 
-    this.cluster = await this.getClusterData(this.clusterName);
-    this.clusterCloudCasaData = await this.getCloudCasaData();
+    if (this.cluster != undefined) {
+      this.clusterServices = await this.getClusterServicesData(
+        this.cluster.spec.displayName
+      );
+      this.clusterCloudCasaData = await this.getCloudCasaData(
+        this.cluster.spec.displayName
+      );
+
+      console.log(this.clusterCloudCasaData);
+    }
   },
   computed: {
     installState(){
-      let clusterId = this.$route.params.cluster;
       let index = -1;
-      if (this.clusterCloudCasaData != null) {
-        index = this.clusterCloudCasaData._items.findIndex(function(data) {
-          return data.name == clusterId;
-        });
+      if (this.clusterCloudCasaData != null && this.cluster != undefined) {
+        if (this.clusterCloudCasaData._id == this.cloudCasaClusterId)
+          index = 0;
       }
 
       if (index != -1) {
@@ -37,61 +68,55 @@ export default {
       }
     },
     clusterName(){
-      return this.$route.params.cluster;
-    },
-    clusterId(){
-      if (this.clusterCloudCasaData != null) {
-        return this.clusterCloudCasaData._items[0]._id;
-      }else{
-        return 'Loading...';
+      if (this.cluster != undefined) {
+        return this.cluster.spec.displayName;
       }
     },
+    clusterId(){
+      return this.$route.params.cluster;
+    },
+    cloudCasaClusterId(){
+      return this.$route.params.ccid;
+    },
     cloudCasaLink(){
-      return 'https://home.cloudcasa.io/clusters/overview/' + this.clusterId +
-        '/backups';
-    }
+      return 'https://home.cloudcasa.io/clusters/overview/' + 
+        this.cloudCasaClusterId + '/backups';
+    },
   },
   methods: {
-    async getClusterData(cluster) {
-      return await this.$store.dispatch('cluster/request', {
-        url: `/k8s/clusters/` + cluster + `/v1/services`,
+    async getCluster(clusterId){
+      return await this.$store.dispatch(`management/find`, {
+        type: MANAGEMENT.CLUSTER,
+        id: clusterId,
       });
     },
-    async getCloudCasaData(){
-      //TODO: Need to make this a module
-      const cloudCasaApiKeyResponse = await this.$store.dispatch(
-        'management/findAll', 
-        { type: 'cloudcasa.rancher.io.configuration' },
-      );
+    async getClusterServicesData(clusterId) {
+      return await this.$store.dispatch('cluster/request', {
+        url: `/k8s/clusters/` + this.clusterId + `/v1/services`,
+      });
+    },
+    async getCloudCasaData(clusterName){
+      let networkRequest = await getCloudCasaRequest(this.$store);
 
-      if (cloudCasaApiKeyResponse.length != 0) {
-        this.cloudCasaApiKey = cloudCasaApiKeyResponse[0].spec.apiToken;
-      }else{
+      if (networkRequest.headers == undefined) {
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Unable to fetch an API Key, try reconfiguring the 
             extension.`,
         }, { root: true });
+        return;
       }
 
-      //Grab cluster data to calculate id and connection status
-      let headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
-      };
-      let method = 'GET';
-      let url = CLOUDCASA_URL + 'kubeclusters' + 
-        '?where={"name": {"$regex":"'+ this.$route.params.cluster +'"}}';
+      networkRequest.method = 'GET';
+      networkRequest.url = networkRequest.url + 
+        `kubeclusters/${this.cloudCasaClusterId}?metrics={"days": 7}&embedded={
+          "backup_provider.user_objectstore": 1
+        }`;
 
+      //Grab cluster data to calculate id and connection status
       return await this.$store.dispatch(
         'management/request', 
-        {
-          url,
-          method,
-          headers,
-          redirectUnauthorized: false,
-        }, 
+        networkRequest,
         { root: true },
       ).catch(function(error){
         console.log(error);
@@ -102,21 +127,50 @@ export default {
         }, { root: true });
       }.bind(this));
     },
-  }
+    routeToMainPage(){
+      this.$router.push('/cloud-casa/dashboard');
+    }
+  },
 }
 </script>
 <template>
-  <div class="header">
-    <div class="section sub-header">
-      <h1>{{this.clusterName}} (ID: {{this.clusterId}})</h1>
+  <div class="center-all">
+    <div class="max-width">
+      <a 
+        @click="this.routeToMainPage()"
+        target="_Blank"
+        class="btn role-primary" 
+        label="Cluster List"
+       >
+        <FontAwesomeIcon :icon="faArrowLeft" /> Back To Cluster List
+      </a>
+      <div style="display: inline-block"></div>
+      <div class="m-25"></div>
+      <div class="header">
+        <div class="section sub-header">
+          <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
+        </div>
+        <div class="section actions">
+          <DashboardButton :dashboardLink="this.cloudCasaLink" />
+        </div>
+      </div>
+      <div v-if="this.installState === 3" class="custom-badge green">
+        Connection Established
+      </div>
+      <div v-if="this.installState === 4" class="custom-badge red">
+        Not Connected
+      </div>
+      <h1 class="cluster-header">Cluster Metrics (Last 7 Days)</h1>
+      <div class="m-5"></div>
+      <CoverageCards :clusterCloudCasaData="this.clusterCloudCasaData" />
+      <div class="m-20"></div>
+      <div v-if="this.cloudCasaClusterId != 'Loading...'">
+        <JobsTable :cloudCasaClusterId="this.cloudCasaClusterId" />
+      </div>
+      <div v-else>
+        Loading Jobs...
+      </div>
     </div>
-    <DashboardButton :dashboardLink="this.cloudCasaLink" />
-  </div>
-  <div v-if="this.installState === 3" class="custom-badge green">
-    Connection Established
-  </div>
-  <div v-if="this.installState === 4" class="custom-badge red">
-    Not Connected
   </div>
 </template>
 <style>
@@ -126,6 +180,25 @@ export default {
     --neutral-gray: #828282;
     --light-gray: #B6B6C2;
     --warning-yellow: #D8A01E;
+  }
+  
+  svg {
+    margin-right: 10px;
+  }
+
+  a{
+    font-size: 20px;
+  }
+
+  .center-all{
+    width: 100%;
+  }
+
+  .max-width{
+    width: 1440px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;  
   }
 
   .light-gray{
