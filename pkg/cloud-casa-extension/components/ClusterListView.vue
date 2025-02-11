@@ -129,7 +129,6 @@ export default defineComponent({
 
           envVars.forEach(envVar =>{
             if (envVar.name == "AMDS_CLUSTER_ID") {
-              console.log(envVar.value);
               newCluster.cloudCasaId = envVar.value;
             }
           })
