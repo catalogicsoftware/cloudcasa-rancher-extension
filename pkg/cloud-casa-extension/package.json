@@ -1,6 +1,6 @@
 {
   "name": "cloud-casa-extension",
-  "description": "cloud-casa-extension plugin",
+  "description": "One-Click Installation and Monitoring for Your Rancher Clusters.",
   "version": "0.3.0",
   "rancher": {
     "annotations": {
