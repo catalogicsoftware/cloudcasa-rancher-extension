@@ -1,7 +1,7 @@
 <script>
-import DashboardButton from './../components/DashboardButton.vue';
-import JobsTable from './../components/cluster_detail_view/JobsTable.vue';
-import CoverageCards from './../components/cluster_detail_view/CoverageCards.vue';
+import DashboardButton from './DashboardButton.vue';
+import JobsTable from './cluster_detail_view/JobsTable.vue';
+import CoverageCards from './cluster_detail_view/CoverageCards.vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'

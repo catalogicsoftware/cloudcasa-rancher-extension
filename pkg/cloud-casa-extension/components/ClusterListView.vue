@@ -1,8 +1,8 @@
 <script>
 import { defineComponent } from 'vue';
-import DashboardButton from './../components/DashboardButton.vue';
-import InstallButton from './../components/cluster_list_view/InstallButton.vue';
-import ClusterState from './../components/cluster_list_view/ClusterState.vue';
+import DashboardButton from './DashboardButton.vue';
+import InstallButton from './cluster_list_view/InstallButton.vue';
+import ClusterState from './cluster_list_view/ClusterState.vue';
 import { CLOUDCASA_URL } from './../types/types.js';
 
 import SortableTable from '@shell/components/SortableTable';

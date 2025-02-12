@@ -1,18 +1,12 @@
 <script>
 import { defineComponent } from 'vue';
 import { MANAGEMENT } from '@shell/config/types';
-import ClusterList from "./../pages/ClusterList.vue"
-import Configurator from "./../pages/Configurator.vue"
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
   try looking at change log or reaching out to Alexandre Alves. Reference this
   GitHub issue: https://github.com/rancher/dashboard/issues/12980*/
   name: 'index-page',
-  components: {
-    ClusterList,
-    Configurator,
-  },
   data() {
     return {
       url: 'api.cloudcasa.io',
@@ -21,24 +15,24 @@ export default defineComponent({
       hasCloudCasaKeyState: 1, //1 = init state, 2 = no key, 3 = key
       CC_CRD: {
         apiVersion: 'apiextensions.k8s.io/v1',
-        kind:       'CustomResourceDefinition',
-        metadata:   { name: 'configurations.cloudcasa.rancher.io' },
-        spec:       {
-          group:    'cloudcasa.rancher.io',
+        kind: 'CustomResourceDefinition',
+        metadata: { name: 'configurations.cloudcasa.rancher.io' },
+        spec: {
+          group: 'cloudcasa.rancher.io',
           versions: [
             {
-              name:    'v1beta1',
-              served:  true,
+              name: 'v1beta1',
+              served: true,
               storage: true,
-              schema:  {
+              schema: {
                 openAPIV3Schema: {
-                  type:       'object',
+                  type: 'object',
                   properties: {
                     spec: {
-                      type:       'object',
+                      type: 'object',
                       properties: {
-                        name:          { type: 'string' },
-                        apiToken:     { type: 'string' },
+                        name: { type: 'string' },
+                        apiToken: { type: 'string' },
                       },
                     },
                   },
@@ -50,7 +44,7 @@ export default defineComponent({
           names: {
             plural:   'configurations',
             singular: 'configuration',
-            kind:     'Configuration',
+            kind: 'Configuration',
             listKind: 'ConfigurationList',
           },
         },
