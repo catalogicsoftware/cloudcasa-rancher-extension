@@ -470,7 +470,7 @@ export default {
     </Tab>
   </Tabbed>
 </template>
-<style>
+<style scoped>
 .tabs .tab{
   padding: 0px;
 }

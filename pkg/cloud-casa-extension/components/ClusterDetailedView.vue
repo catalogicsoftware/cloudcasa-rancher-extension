@@ -11,7 +11,6 @@ import Tab from '@shell/components/Tabbed/Tab';
 import SortableTable from '@shell/components/SortableTable';
 
 import { CLOUDCASA_URL } from './../types/types.js';
-import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
 import { MANAGEMENT } from '@shell/config/types';
 
 export default {
@@ -49,8 +48,6 @@ export default {
       this.clusterCloudCasaData = await this.getCloudCasaData(
         this.cluster.spec.displayName
       );
-
-      console.log(this.clusterCloudCasaData);
     }
   },
   computed: {
@@ -173,7 +170,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
   :root{
     --active-green: #5D995D;
     --failure-red: #F64747;

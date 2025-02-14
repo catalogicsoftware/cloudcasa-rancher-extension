@@ -55,7 +55,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
+<style scoped>
   .status-dot:empty{
     float: left;
     display: block;

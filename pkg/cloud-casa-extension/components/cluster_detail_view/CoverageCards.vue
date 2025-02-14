@@ -136,7 +136,7 @@ export default{
     </div>-->
   </div>
 </template>
-<style>
+<style scoped>
   .card-container{
     width: 100%;
     display: flex;
