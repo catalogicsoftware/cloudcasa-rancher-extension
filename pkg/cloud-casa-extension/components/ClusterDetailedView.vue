@@ -13,6 +13,8 @@ import SortableTable from '@shell/components/SortableTable';
 import { CLOUDCASA_URL } from './../types/types.js';
 import { MANAGEMENT } from '@shell/config/types';
 
+import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+
 export default {
   layout: 'plain',
   name: 'detailed-cluster-view',
@@ -171,14 +173,6 @@ export default {
   </div>
 </template>
 <style scoped>
-  :root{
-    --active-green: #5D995D;
-    --failure-red: #F64747;
-    --neutral-gray: #828282;
-    --light-gray: #B6B6C2;
-    --warning-yellow: #D8A01E;
-  }
-  
   svg {
     margin-right: 10px;
   }
@@ -199,7 +193,7 @@ export default {
   }
 
   .light-gray{
-    color: var(--light-gray);
+    color: #B6B6C2;
   }
 
   .header{
@@ -238,17 +232,17 @@ export default {
   }
 
   .custom-badge.green{
-    border-color: var(--active-green);
-    color: var(--active-green);
+    border-color: #5D995D;
+    color: #5D995D;
   }
 
   .custom-badge.gray{
-    border-color: var(--neutral-gray);
-    color: var(--neutral-gray);
+    border-color: #828282;
+    color: #828282;
   }
 
   .custom-badge.red{
-    border-color: var(--failure-red);
-    color: var(--failure-red);
+    border-color: #F64747;
+    color: #F64747;
   }
 </style>

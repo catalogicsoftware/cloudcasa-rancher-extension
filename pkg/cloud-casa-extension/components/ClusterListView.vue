@@ -225,8 +225,7 @@ export default defineComponent({
           <div class="section actions">
             <a
               @click="routeToConfiguratorPage()"
-              style='font-size: 20px; margin-left: 15px;' 
-              class="btn role-primary" 
+              class="btn role-primary reconfigure-button" 
               label="Open CloudCasa"
              >
               Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
@@ -388,5 +387,10 @@ export default defineComponent({
     border-width: 8px;
     border-style: solid;
     border-color: #4A4B52 transparent transparent transparent;
+  }
+
+  .reconfigure-button{
+    font-size: 20px; 
+    margin-left: 15px;
   }
 </style>
