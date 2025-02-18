@@ -1,8 +1,27 @@
 import { IPlugin } from '@shell/core/types';
 
 export function init($plugin: IPlugin, store: any) {
-  const YOUR_PRODUCT_NAME = 'cloud-casa';
+  const YOUR_PRODUCT_NAME = 'CloudCasa';
   const BLANK_CLUSTER = '_';
+
+  const styleSheet = document.createElement('style');
+  const css = `
+    .side-menu .category div a > img {
+      display: block;
+      width: 42px;
+      font-size: 25px;
+      margin-left: 1px;
+    }
+    .theme-dark .side-menu .category div a > img {
+      filter: brightness(0) saturate(100%) invert(39%) sepia(90%) saturate(399%) hue-rotate(160deg) brightness(93%) contrast(95%)
+    }
+    .theme-dark .side-menu .category div a:hover > img, .side-menu .category div a.active-menu-link > img {
+      filter:  brightness(0) invert(1);
+    }
+  `;
+
+  styleSheet.textContent = css;
+  document.head.appendChild(styleSheet);
 
   const { 
     basicType,
@@ -13,7 +32,8 @@ export function init($plugin: IPlugin, store: any) {
   } = $plugin.DSL(store, YOUR_PRODUCT_NAME);
 
   product({
-    icon: 'monitoring',
+    name: `${YOUR_PRODUCT_NAME}`,
+    svg: require('./logo.svg'),
     inStore: 'management',
     weight: 100,
     showClusterSwitcher: false,

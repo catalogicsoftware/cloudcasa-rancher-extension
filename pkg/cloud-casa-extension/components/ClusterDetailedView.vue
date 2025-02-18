@@ -10,7 +10,7 @@ import Tabbed from '@shell/components/Tabbed';
 import Tab from '@shell/components/Tabbed/Tab';
 import SortableTable from '@shell/components/SortableTable';
 
-import { CLOUDCASA_URL } from './../types/types.js';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 import { MANAGEMENT } from '@shell/config/types';
 
 import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
@@ -127,7 +127,7 @@ export default {
       }.bind(this));
     },
     routeToMainPage(){
-      this.$router.push('/cloud-casa/dashboard');
+      this.$router.push('/' + PRODUCT_NAME + '/dashboard');
     }
   },
 }

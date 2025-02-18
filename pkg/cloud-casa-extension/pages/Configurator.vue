@@ -7,7 +7,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Banner } from '@components/Banner';
 import SimpleBox from '@shell/components/SimpleBox';
 import { LabeledInput } from '@components/Form/LabeledInput';
-import { CLOUDCASA_URL } from './../types/types.js';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 
 import { getCloudCasaApiKey } from './../modules/network.js';
 
@@ -34,14 +34,18 @@ export default defineComponent({
       doesAPiKeyExist: false,
     }
   },
+  async mounted() {
+    const cloudCasaApiKey = await this.findCloudCasaApiKey();
+  },
   methods: {
     async findCloudCasaApiKey(){
-      const apiKeyValue = await getCloudCasaApiKey(this.$store).value;
-      
+      const apiKeyValue = await getCloudCasaApiKey(this.$store);
+     
+      console.log(apiKeyValue);
       if (apiKeyValue !== undefined)
-        return true;
-
-      return false;
+        this.doesAPiKeyExist = true;
+      else
+        this.doesAPiKeyExist = false;
     },
     async findExistingConfig(){
       let currentConfig;
@@ -123,7 +127,7 @@ export default defineComponent({
       }.bind(this));
     },
     routeToMainPage(){
-      this.$router.push('/cloud-casa/dashboard');
+      this.$router.push('/' + PRODUCT_NAME + '/dashboard');
     }
   },
 })
@@ -132,7 +136,7 @@ export default defineComponent({
   <div class="center-all">
     <div class="max-width">
       <a 
-        v-if="this.findCloudCasaApiKey()"
+        v-if="this.doesAPiKeyExist"
         @click="this.routeToMainPage()"
         target="_Blank"
         class="btn role-primary back-button" 
@@ -178,6 +182,10 @@ export default defineComponent({
   </div>
 </template>
 <style scoped>
+  svg {
+    margin-right: 10px;
+  }
+
   .center-all{
     width: 100%;
     text-align: center;
@@ -217,9 +225,9 @@ export default defineComponent({
     margin-top: 10px;
   }
 
-
   .back-button {
     float: left;
     margin-bottom: 10px;
+    font-size: 20px;
   }
 </style>

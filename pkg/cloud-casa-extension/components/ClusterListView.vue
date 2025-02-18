@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import DashboardButton from './DashboardButton.vue';
 import InstallButton from './cluster_list_view/InstallButton.vue';
 import ClusterState from './cluster_list_view/ClusterState.vue';
-import { CLOUDCASA_URL } from './../types/types.js';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 
 import SortableTable from '@shell/components/SortableTable';
 import { BadgeState } from '@components/BadgeState';
@@ -203,7 +203,7 @@ export default defineComponent({
       return newCluster;
     },
     routeToConfiguratorPage(){
-      this.$router.push("/cloud-casa/configurator");
+      this.$router.push('/' + PRODUCT_NAME + '/configurator');
     },
   },
 })
@@ -212,6 +212,13 @@ export default defineComponent({
   <div class="center-all">
     <div class="max-width">
       <div class="main-spacing">
+        <div style="text-align: center;">
+          <img 
+            style="width: 250px;"
+            src="https://cloudcasa.io/assets/logo-white-1.png" 
+          />
+        </div>
+        <div class="m-20"></div>
         <div class="header">
           <div class="section sub-header">
             <h1>Clusters</h1>

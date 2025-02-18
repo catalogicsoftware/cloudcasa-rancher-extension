@@ -165,7 +165,7 @@ export default {
       }.bind(this));
     },
     routeToDetailedPage(id, ccid){
-      this.$router.push('/cloud-casa/c/' + id + '/' + ccid);
+      this.$router.push('/CloudCasa/c/' + id + '/' + ccid);
     }
   },
 }

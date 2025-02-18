@@ -66,11 +66,11 @@ export default defineComponent({
     if (apiKeyResponse.length != 0) {
       this.cloudCasaApiKey = apiKeyResponse[0].spec.apiToken;
       this.hasCloudCasaKeyState == 3
-      this.$router.push('/cloud-casa/dashboard');
+      this.$router.push('/CloudCasa/dashboard');
     //Key does not exist, show configurator
     } else {
       this.hasCloudCasaKeyState == 2
-      this.$router.push('/cloud-casa/configurator');
+      this.$router.push('/CloudCasa/configurator');
     }
   },
   methods: {

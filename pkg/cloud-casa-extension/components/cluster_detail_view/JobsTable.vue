@@ -297,7 +297,7 @@ export default {
         }
 
         let parsedDate = '';
-        console.log(i, type, rawData);
+        
         if (
           rawData._items[i].status != undefined && 
           rawData._items[i].status.last_job_run_time != undefined
