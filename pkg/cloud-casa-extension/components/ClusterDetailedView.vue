@@ -1,7 +1,7 @@
 <script>
-import DashboardButton from './../components/DashboardButton.vue';
-import JobsTable from './../components/cluster_detail_view/JobsTable.vue';
-import CoverageCards from './../components/cluster_detail_view/CoverageCards.vue';
+import DashboardButton from './DashboardButton.vue';
+import JobsTable from './cluster_detail_view/JobsTable.vue';
+import CoverageCards from './cluster_detail_view/CoverageCards.vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
@@ -10,9 +10,10 @@ import Tabbed from '@shell/components/Tabbed';
 import Tab from '@shell/components/Tabbed/Tab';
 import SortableTable from '@shell/components/SortableTable';
 
-import { CLOUDCASA_URL } from './../types/types.js';
-import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 import { MANAGEMENT } from '@shell/config/types';
+
+import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
 
 export default {
   layout: 'plain',
@@ -49,8 +50,6 @@ export default {
       this.clusterCloudCasaData = await this.getCloudCasaData(
         this.cluster.spec.displayName
       );
-
-      console.log(this.clusterCloudCasaData);
     }
   },
   computed: {
@@ -128,7 +127,7 @@ export default {
       }.bind(this));
     },
     routeToMainPage(){
-      this.$router.push('/cloud-casa/dashboard');
+      this.$router.push('/' + PRODUCT_NAME + '/dashboard');
     }
   },
 }
@@ -173,15 +172,7 @@ export default {
     </div>
   </div>
 </template>
-<style>
-  :root{
-    --active-green: #5D995D;
-    --failure-red: #F64747;
-    --neutral-gray: #828282;
-    --light-gray: #B6B6C2;
-    --warning-yellow: #D8A01E;
-  }
-  
+<style scoped>
   svg {
     margin-right: 10px;
   }
@@ -202,7 +193,7 @@ export default {
   }
 
   .light-gray{
-    color: var(--light-gray);
+    color: #B6B6C2;
   }
 
   .header{
@@ -241,17 +232,17 @@ export default {
   }
 
   .custom-badge.green{
-    border-color: var(--active-green);
-    color: var(--active-green);
+    border-color: #5D995D;
+    color: #5D995D;
   }
 
   .custom-badge.gray{
-    border-color: var(--neutral-gray);
-    color: var(--neutral-gray);
+    border-color: #828282;
+    color: #828282;
   }
 
   .custom-badge.red{
-    border-color: var(--failure-red);
-    color: var(--failure-red);
+    border-color: #F64747;
+    color: #F64747;
   }
 </style>

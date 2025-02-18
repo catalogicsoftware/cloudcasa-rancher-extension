@@ -69,7 +69,7 @@ export default{
 <template>
   <div class="card-container">
     <div class="card">
-      <h1>Job Success</h1>
+      <h1>Backup Job Success</h1>
       <br />
       <div class="card-data-container">
         <div class="card-percentage">
@@ -83,7 +83,10 @@ export default{
         <br />
       </div>
       <br />
-      <PercentageBar :modelValue="this.jobSuccess.percentage" />
+      <PercentageBar 
+        :modelValue="this.jobSuccess.percentage" 
+        preferred-direction="MORE"
+      />
     </div>
     <div class="card">
       <h1>PV Backup Coverage</h1>
@@ -100,7 +103,10 @@ export default{
         <br />
       </div>
       <br />
-      <PercentageBar :modelValue="this.pvBackupCoverage.percentage" />
+      <PercentageBar 
+        :modelValue="this.pvBackupCoverage.percentage" 
+        preferred-direction="MORE"
+      />
     </div>
     <div class="card">
       <h1>PV Snapshot Coverage</h1>
@@ -117,7 +123,10 @@ export default{
         <br />
       </div>
       <br />
-      <PercentageBar :modelValue="this.pvSnapshotCoverage.percentage" />
+      <PercentageBar 
+        :modelValue="this.pvSnapshotCoverage.percentage" 
+        preferred-direction="MORE"
+      />
     </div>
     <!--<div class="card">
       <h1>Safelock Coverage</h1>
@@ -136,7 +145,7 @@ export default{
     </div>-->
   </div>
 </template>
-<style>
+<style scoped>
   .card-container{
     width: 100%;
     display: flex;

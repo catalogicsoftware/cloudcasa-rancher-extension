@@ -4,7 +4,7 @@ import Configurator from '../pages/Configurator.vue';
 import DetailedCluster from '../pages/DetailedCluster.vue';
 
 const BLANK_CLUSTER = '_';
-const YOUR_PRODUCT_NAME = 'cloud-casa';
+const YOUR_PRODUCT_NAME = 'CloudCasa';
 
 const routes = [
   {

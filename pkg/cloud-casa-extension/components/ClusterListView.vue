@@ -1,9 +1,9 @@
 <script>
 import { defineComponent } from 'vue';
-import DashboardButton from './../components/DashboardButton.vue';
-import InstallButton from './../components/cluster_list_view/InstallButton.vue';
-import ClusterState from './../components/cluster_list_view/ClusterState.vue';
-import { CLOUDCASA_URL } from './../types/types.js';
+import DashboardButton from './DashboardButton.vue';
+import InstallButton from './cluster_list_view/InstallButton.vue';
+import ClusterState from './cluster_list_view/ClusterState.vue';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 
 import SortableTable from '@shell/components/SortableTable';
 import { BadgeState } from '@components/BadgeState';
@@ -203,7 +203,7 @@ export default defineComponent({
       return newCluster;
     },
     routeToConfiguratorPage(){
-      this.$router.push("/cloud-casa/configurator");
+      this.$router.push('/' + PRODUCT_NAME + '/configurator');
     },
   },
 })
@@ -212,6 +212,13 @@ export default defineComponent({
   <div class="center-all">
     <div class="max-width">
       <div class="main-spacing">
+        <div style="text-align: center;">
+          <img 
+            style="width: 250px;"
+            src="https://cloudcasa.io/assets/logo-white-1.png" 
+          />
+        </div>
+        <div class="m-20"></div>
         <div class="header">
           <div class="section sub-header">
             <h1>Clusters</h1>
@@ -225,8 +232,7 @@ export default defineComponent({
           <div class="section actions">
             <a
               @click="routeToConfiguratorPage()"
-              style='font-size: 20px; margin-left: 15px;' 
-              class="btn role-primary" 
+              class="btn role-primary reconfigure-button" 
               label="Open CloudCasa"
              >
               Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
@@ -281,7 +287,7 @@ export default defineComponent({
     </div>
   </div>
 </template>
-<style>
+<style scoped>
   .center-all{
     width: 100%;
   }
@@ -388,5 +394,10 @@ export default defineComponent({
     border-width: 8px;
     border-style: solid;
     border-color: #4A4B52 transparent transparent transparent;
+  }
+
+  .reconfigure-button{
+    font-size: 20px; 
+    margin-left: 15px;
   }
 </style>

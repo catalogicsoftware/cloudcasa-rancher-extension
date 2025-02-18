@@ -2,7 +2,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons'
 
-import LastThreeRuns from './../cluster_detail_view/LastThreeRuns.vue';
+import LastThreeRuns from './LastThreeRuns.vue';
 
 import Tabbed from '@shell/components/Tabbed';
 import Tab from '@shell/components/Tabbed/Tab';
@@ -169,10 +169,10 @@ export default {
     async getCloudCasaRestoresData(){
       let networkRequest = await getCloudCasaRequest(this.$store);
       networkRequest.method = 'GET';
-      networkRequest.url = networkRequest.url + `kuberestores?sort=-_updated&embedded=
-        {"cluster": 1,"backup_inst": 1, "backup_inst.cluster": 1}&where={
-          "migrationdef":{"$exists": false}, 
-          "cluster":"${this.cloudCasaClusterId}"
+      networkRequest.url = networkRequest.url + `kuberestores?sort=-_updated&embedded={
+        "cluster": 1,"backup_inst": 1, "backup_inst.cluster": 1}&where={
+          "migrationdef":{"$exists": false},"$or":[{"cluster":"${this.cloudCasaClusterId}"},
+          {"source_cluster":"${this.cloudCasaClusterId}"}]
         }&page=1`;
 
       const cloudCasaRestoreData = await this.$store.dispatch(
@@ -297,7 +297,7 @@ export default {
         }
 
         let parsedDate = '';
-        console.log(i, type, rawData);
+        
         if (
           rawData._items[i].status != undefined && 
           rawData._items[i].status.last_job_run_time != undefined
@@ -470,7 +470,11 @@ export default {
     </Tab>
   </Tabbed>
 </template>
-<style>
+<style scoped>
+svg{
+  margin-left: 10px;
+}
+
 .tabs .tab{
   padding: 0px;
 }

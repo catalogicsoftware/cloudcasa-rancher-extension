@@ -24,15 +24,19 @@ async function getAuthHeaders(store){
   }
 }
 
-async function getCloudCasaApiKey(store){
+export async function getCloudCasaApiKey(store){
   const cloudCasaApiKeyResponse = await store.dispatch(
     'management/findAll', 
     { type: 'cloudcasa.rancher.io.configuration' },
-  );
+  ).catch(function(error){
+    console.log(error)
+  });
 
-  if (cloudCasaApiKeyResponse.length != 0) {
+  if (cloudCasaApiKeyResponse == undefined)
+    return undefined
+
+  if (cloudCasaApiKeyResponse.length != 0)
     return cloudCasaApiKeyResponse[0].spec.apiToken;
-  }
 
   return undefined;
 }

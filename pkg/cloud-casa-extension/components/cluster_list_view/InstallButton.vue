@@ -29,15 +29,14 @@ export default {
     localSetInstallState(value){
       this.$emit("install-state-func", value, this.row);
     },
-    waitForInstallComplete(clusterName){
+    waitForInstallComplete(cloudCasaId){
       let headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
       };
       let method = 'GET';
-      let url = CLOUDCASA_URL + 'kubeclusters?where=' + 
-        '{"name":{"$regex":"'+ clusterName +'"}}';
+      let url = CLOUDCASA_URL + 'kubeclusters/' + cloudCasaId;
 
       this.ccWaitTimer = setInterval(() => {
         this.$store.dispatch('management/request', {
@@ -46,9 +45,10 @@ export default {
           headers,
           redirectUnauthorized: false,
         }, { root: true }).then(clusterObject => {
-          let status = clusterObject._items[0].status.state;
+          let status = clusterObject.status.state;
           
           if (status == "ACTIVE"){
+            this.row.cloudCasaId = cloudCasaId;
             this.localSetInstallState(3)
             clearInterval(this.ccWaitTimer)
           }
@@ -60,21 +60,25 @@ export default {
     },
 
     //Full install of cloud casa (register + agent install)
-    async startCloudCasaInstall(clusterName){
+    async startCloudCasaInstall(clusterId, clusterName){
       this.localSetInstallState(2);
 
-      let cloudCasaResponse = await this.registerClusterOnCloudCasa(clusterName); 
+      let cloudCasaResponse = await this.registerClusterOnCloudCasa(
+        clusterId,
+        clusterName,
+      ); 
       
       if (cloudCasaResponse == undefined) {
         return;
       }
       
       return this.installCloudCasaAgent(
-        clusterName, 
+        clusterId,
+        cloudCasaResponse._id,
         cloudCasaResponse.status.agentURL,
       );
     },
-    async registerClusterOnCloudCasa(clusterName){
+    async registerClusterOnCloudCasa(clusterId, clusterName){
       let headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -84,7 +88,7 @@ export default {
       let url = CLOUDCASA_URL + 'kubeclusters';
       let body = {
         "name": clusterName,
-        "description": "Created for testing purposes",
+        "description": "Cluster setup with the CloudCasa Rancher Extension.",
       };
       return await this.$store.dispatch('management/request', {
         url,
@@ -99,7 +103,7 @@ export default {
     },
 
     //CloudCasa agent Install 
-    async beginCloudCasaAgentInstall(clusterName){
+    async beginCloudCasaAgentInstall(cloudCasaId){
       this.localSetInstallState(2);
       let headers = {
         'Accept': 'application/json',
@@ -107,8 +111,7 @@ export default {
         'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
       };
       let method = 'GET';
-      let url = CLOUDCASA_URL + 'kubeclusters?where=' + 
-        '{"name":{"$regex":"'+ clusterName +'"}}';
+      let url = CLOUDCASA_URL + 'kubeclusters/' + cloudCasaId;
 
       this.$store.dispatch('management/request', {
         url,
@@ -117,8 +120,9 @@ export default {
         redirectUnauthorized: false,
       }, { root: true }).then(clusterObject => {
         this.installCloudCasaAgent(
-          clusterName, 
-          clusterObject._items[0].status.agentURL,
+          clusterId,
+          clusterObject._id,
+          clusterObject.status.agentURL,
         );
       }).catch(function(error){
         console.log('Did not find cluster in CloudCasa', error);
@@ -126,7 +130,7 @@ export default {
       }.bind(this));
 
     },
-    async installCloudCasaAgent(clusterName, agentURL){
+    async installCloudCasaAgent(clusterId, cloudCasaId, agentURL){
       //Get config file from CloudCasa
       let headers = {
         'Accept': 'application/json',
@@ -143,11 +147,11 @@ export default {
         redirectUnauthorized: false,
       }, { root: true }).then(data => {
           //start listening to CloudCasa API for the install to complete
-          this.waitForInstallComplete(clusterName);
+          this.waitForInstallComplete(cloudCasaId);
 
           //Apply config file to the cluster
           return this.$store.dispatch('management/request', {
-            url: `/v1/management.cattle.io.clusters/` + clusterName + 
+            url: `/v1/management.cattle.io.clusters/` + clusterId + 
               '?action=apply',
             method: 'POST',
             data: {
@@ -161,7 +165,7 @@ export default {
       }.bind(this));
     },
     routeToDetailedPage(id, ccid){
-      this.$router.push('/cloud-casa/c/' + id + '/' + ccid);
+      this.$router.push('/CloudCasa/c/' + id + '/' + ccid);
     }
   },
 }
@@ -171,7 +175,7 @@ export default {
     v-if="row.installState == 2 || row.installState == 0"
     v-bind="{disabled: row.installState == 2 ? true : null}"
     class="btn role-primary" 
-    @click="startCloudCasaInstall(row.id)"
+    @click="startCloudCasaInstall(row.id, row.name)"
   >
     <span>
       Install <FontAwesomeIcon v-if="row.installState === 2" :icon="faSpinner" spin />
@@ -180,7 +184,7 @@ export default {
   <button
     v-if="row.installState == 1"
     class="btn role-primary" 
-    @click="beginCloudCasaAgentInstall(row.id)"
+    @click="beginCloudCasaAgentInstall(row.cloudCasaId)"
   >
     <span>
       Install <FontAwesomeIcon v-if="row.installState === 2" :icon="faSpinner" spin />

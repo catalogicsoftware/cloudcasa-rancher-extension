@@ -1,10 +1,15 @@
 <script>
 import { defineComponent } from 'vue';
 
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+
 import { Banner } from '@components/Banner';
 import SimpleBox from '@shell/components/SimpleBox';
 import { LabeledInput } from '@components/Form/LabeledInput';
-import { CLOUDCASA_URL } from './../types/types.js';
+import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
+
+import { getCloudCasaApiKey } from './../modules/network.js';
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
@@ -12,20 +17,39 @@ export default defineComponent({
   GitHub issue: https://github.com/rancher/dashboard/issues/12980*/
   name: "configurator-page",
   components: {
+    FontAwesomeIcon,
     Banner,
     SimpleBox,
-    LabeledInput
+    LabeledInput,
+    getCloudCasaApiKey
+  },
+  setup(){
+    return {
+      faArrowLeft
+    }
   },
   data() {
     return {
-      cloudCasaApiKey: ''
+      cloudCasaApiKey: '',
+      doesAPiKeyExist: false,
     }
   },
+  async mounted() {
+    const cloudCasaApiKey = await this.findCloudCasaApiKey();
+  },
   methods: {
-    async saveApiKey(){
+    async findCloudCasaApiKey(){
+      const apiKeyValue = await getCloudCasaApiKey(this.$store);
+     
+      console.log(apiKeyValue);
+      if (apiKeyValue !== undefined)
+        this.doesAPiKeyExist = true;
+      else
+        this.doesAPiKeyExist = false;
+    },
+    async findExistingConfig(){
       let currentConfig;
 
-      //Grab configuration (should exist since index.vue handles this)
       const findExistingConfig = await this.$store.dispatch(
         'management/findAll', 
         { type: 'cloudcasa.rancher.io.configuration' },
@@ -53,6 +77,12 @@ export default defineComponent({
         currentConfig = findExistingConfig[0];
         currentConfig.spec.apiToken = this.cloudCasaApiKey;
       }
+
+      return currentConfig;
+    },
+    async saveApiKey(){
+      //Grab configuration (should exist since index.vue handles this)
+      let currentConfig = await this.findExistingConfig()
 
       //Save key
       currentConfig.save().then(_ => {
@@ -96,12 +126,24 @@ export default defineComponent({
         }, { root: true });
       }.bind(this));
     },
+    routeToMainPage(){
+      this.$router.push('/' + PRODUCT_NAME + '/dashboard');
+    }
   },
 })
 </script>
 <template>
   <div class="center-all">
     <div class="max-width">
+      <a 
+        v-if="this.doesAPiKeyExist"
+        @click="this.routeToMainPage()"
+        target="_Blank"
+        class="btn role-primary back-button" 
+        label="Cluster List"
+       >
+        <FontAwesomeIcon :icon="faArrowLeft" /> Back To Cluster List
+      </a>
       <Banner
         color="warning"
         label="This Rancher Extension can be installed and managed by anyone with admin access. Please ensure that only trusted administrators are granted access, and regularly monitor the extension's usage and settings for unauthorized changes."
@@ -140,10 +182,13 @@ export default defineComponent({
   </div>
 </template>
 <style scoped>
+  svg {
+    margin-right: 10px;
+  }
+
   .center-all{
     width: 100%;
     text-align: center;
-    justify-content: center;
   }
 
   .max-width{
@@ -178,5 +223,11 @@ export default defineComponent({
 
   .btn-save-api-key{
     margin-top: 10px;
+  }
+
+  .back-button {
+    float: left;
+    margin-bottom: 10px;
+    font-size: 20px;
   }
 </style>
