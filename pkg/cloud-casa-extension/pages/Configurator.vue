@@ -41,7 +41,6 @@ export default defineComponent({
     async findCloudCasaApiKey(){
       const apiKeyValue = await getCloudCasaApiKey(this.$store);
      
-      console.log(apiKeyValue);
       if (apiKeyValue !== undefined)
         this.doesAPiKeyExist = true;
       else
@@ -105,7 +104,7 @@ export default defineComponent({
           { root: true },
         //If the key works against a CloudCasa endpoint, continue to cluster list
         ).then(function(){
-          this.$router.push("/cloud-casa/dashboard");
+          this.$router.push('/' + PRODUCT_NAME + '/dashboard');
         //If something is wrong with the key, show the growl
         }.bind(this)).catch(function(error){
           console.log(error);
@@ -192,7 +191,7 @@ export default defineComponent({
   }
 
   .max-width{
-    width: 1440px;
+    width: 70%;
     display: block;
     margin-left: auto;
     margin-right: auto;
@@ -218,7 +217,7 @@ export default defineComponent({
   
   .key-input{
     display: block;
-    width: 700px;
+    width: 450px;
   }
 
   .btn-save-api-key{
