@@ -318,33 +318,6 @@ export default defineComponent({
     margin: 2rem;
   }
 
-  tr{
-    th:first-child{
-      padding: 20px 0px 20px 10px !important;
-    }
-
-    th{
-      padding: 20px 0px 20px 0px !important;
-      font-size: 15px;
-      .icon-stack{
-        margin-left: 5px;
-      }
-    }
-
-    td:first-child{
-      padding: 10px 0px 10px 10px !important;
-    }
-
-    td:last-child{
-      padding: 10px 10px 10px 0px !important;
-    }
-
-    td{
-      font-size: 15px;
-      padding: 10px 0px 10px 0px !important;
-    }
-  }
-
   .installing-text{
     color: #B6B6C2;
   }
