@@ -61,12 +61,12 @@ export default defineComponent({
         {
           name: 'spacing',
           label: ' ',
-          width: '22%',
+          width: '20%',
         },
         {
           name: 'additionalText',
           label: ' ',
-          width: '10%',
+          width: '12%',
         },
         {
           name: 'install',
@@ -293,7 +293,7 @@ export default defineComponent({
   }
 
   .max-width{
-    width: 1440px;
+    width: 70%;
     display: block;
     margin-left: auto;
     margin-right: auto;  
@@ -316,33 +316,6 @@ export default defineComponent({
 
   .main-spacing{
     margin: 2rem;
-  }
-
-  tr{
-    th:first-child{
-      padding: 20px 0px 20px 10px !important;
-    }
-
-    th{
-      padding: 20px 0px 20px 0px !important;
-      font-size: 15px;
-      .icon-stack{
-        margin-left: 5px;
-      }
-    }
-
-    td:first-child{
-      padding: 10px 0px 10px 10px !important;
-    }
-
-    td:last-child{
-      padding: 10px 10px 10px 0px !important;
-    }
-
-    td{
-      font-size: 15px;
-      padding: 10px 0px 10px 0px !important;
-    }
   }
 
   .installing-text{

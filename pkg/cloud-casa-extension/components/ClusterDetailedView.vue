@@ -186,7 +186,7 @@ export default {
   }
 
   .max-width{
-    width: 1440px;
+    width: 70%;
     display: block;
     margin-left: auto;
     margin-right: auto;  
