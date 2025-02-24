@@ -34,6 +34,7 @@ export default {
   },
   data() {
     return {
+      dashboardName: 'CloudCasa Cluster Dashboard',
       cluster: null,
       ccid: null,
       clusterServices: null,
@@ -150,7 +151,10 @@ export default {
           <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
         </div>
         <div class="section actions">
-          <DashboardButton :dashboardLink="this.cloudCasaLink" />
+          <DashboardButton 
+            :dashboardName="this.dashboardName"
+            :dashboardLink="this.cloudCasaLink" 
+          />
         </div>
       </div>
       <div v-if="this.installState === 3" class="custom-badge green">

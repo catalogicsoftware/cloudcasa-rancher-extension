@@ -139,21 +139,24 @@ export default {
   computed: {
     getBackupData(){
       return this.tableData.filter(job => {
-        return job.type == "backup";
+        return job.type == 'backup';
       });
     },
     getMigrationData(){
       return this.tableData.filter(job => {
-        return job.type == "migration";
+        return job.type == 'migration';
       });
     },
     getReplicationData(){
       return this.tableData.filter(job => {
-        return job.type == "replication";
+        return job.type == 'replication';
       });
     },
   },
   methods: {
+    handlePaginationChanged(test){
+      console.log('TEST');
+    },
     getBackupsLink(id){
       return 'https://home.cloudcasa.io/clusters/backups/' + id + '/activity'
     },
@@ -335,12 +338,14 @@ export default {
       :label="Backups"
       :weight="10"
     >
-      <SortableTable
+      <SortableTable paging
         :rows="this.getBackupData"
         :headers="this.tableHeaders"
         :search="false"
         :table-actions="false"
         :row-actions="false"
+        :rowsPerPage="1"
+        @pagination-changed="this.handlePaginationChanged"
       >
         <template #cell:name="{ row }">
           {{ row.name }}

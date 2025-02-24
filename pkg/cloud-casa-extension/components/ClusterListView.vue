@@ -30,6 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
+      dashboardName: 'CloudCasa Dashboard',
       tableHeaders: [
         {
           name: 'id',
@@ -237,7 +238,10 @@ export default defineComponent({
              >
               Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
             </a>
-            <DashboardButton :dashboardLink="this.mainDashboardLink" />
+            <DashboardButton 
+              :dashboardName="this.dashboardName"
+              :dashboardLink="this.mainDashboardLink" 
+            />
           </div>
         </div>
         <div v-if="!this.loadingClusters">

@@ -4,6 +4,7 @@ import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons'
 
 export default {
   props: {
+    dashboardName: String,
     dashboardLink: String,
   },
   components: {
@@ -23,7 +24,7 @@ export default {
     class="btn role-primary" 
     label="Open CloudCasa"
    >
-    My Dashboard <FontAwesomeIcon :icon="faArrowUpRightFromSquare" />
+   {{this.dashboardName}} <FontAwesomeIcon :icon="faArrowUpRightFromSquare" />
   </a>
 </template>
 <style scoped>
