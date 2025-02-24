@@ -1,6 +1,6 @@
 import { CloudCasaState } from './index';
 
 export default {
-  name:         (state: CloudCasaState) => state.name,
-  apiToken:       (state: CloudCasaState) => state.apiToken,
+  apiEndpoint: (state: CloudCasaState) => state.apiEndpoint,
+  apiToken: (state: CloudCasaState) => state.apiToken,
 };
