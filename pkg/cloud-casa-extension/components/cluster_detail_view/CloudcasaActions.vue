@@ -12,6 +12,8 @@ export default {
   props: {
     backupId: String,
     copyDef: String,
+    etag: String,
+    pause: Boolean,
   },
   components: {
     ButtonDropdown,
@@ -19,21 +21,30 @@ export default {
   data() {
     return {
       buttonLabel: 'Actions',
-      dropdownOptions: ['Start Backup', 'Pause Backup', 'Restore', 'Edit']
+      localPause: this.pause,
+      localEtag: this.etag,
+    }
+  },
+  computed: {
+    getDropdownOptions(){
+      if (this.localPause) {
+        return ['Start Backup', 'Resume Backup', 'Restore', 'Edit']
+      }else{
+        return ['Start Backup', 'Pause Backup', 'Restore', 'Edit']
+      }
     }
   },
   methods: {
-    runJobWatcher(){
-      /*Need to watch for backup job when initiated and check status of job before
-      loading the dropdown options.*/
-    },
     routeDropdownClick(action){
       switch (action) {
         case 'Start Backup':
           this.startBackup();
           break;
         case 'Pause Backup':
-          
+          this.resumePauseBackup();    
+          break;
+        case 'Resume Backup':
+          this.resumePauseBackup();    
           break;
         case 'Restore':
           this.restoreLinkTo();
@@ -64,42 +75,50 @@ export default {
         'management/request', 
         networkRequest, 
         { root: true },
-      ).catch(function(error){
+      ).then(function(){
+        this.$store.dispatch('growl/success', {
+          title: 'Backup Started',
+          message: `A backup has been successfully started.`,
+        }, { root: true });
+      }).catch(function(error){
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Failed to start backup job.`,
         }, { root: true });
       }.bind(this));
     },
-    //cancel backup needed? Need to update dropdown list dynamically regardless
-    async pausePolicy(){
+    async resumePauseBackup(pause){
       let networkRequest = await getCloudCasaRequest(this.$store);
-      networkRequest.method = 'POST';
-      networkRequest.url = networkRequest.url + 'policies/' + this.copyDef + 
-        '/action/suspend';
-      
+      networkRequest.method = 'PATCH';
+      networkRequest.url = networkRequest.url + 'kubebackups/' + this.backupId;
+      networkRequest.data = {
+        "pause": !this.localPause
+      }
+      networkRequest.headers['If-Match'] = this.localEtag;
+
       return await this.$store.dispatch(
         'management/request', 
         networkRequest, 
         { root: true },
-      ).catch(function(error){
-        this.$store.dispatch('growl/error', {
-          title: 'Something Went Wrong',
-          message: `Failed to pause the backup policy`,
+      ).then(function(response){
+        //Paused or Resumed phrasing depending on boolean
+        let phrase = '';
+
+        if (this.localPause) {
+          phrase = 'resumed';
+        }else{
+          phrase = 'paused';
+        }
+
+        this.localPause = !this.localPause;
+        this.localEtag = response._etag;
+
+        this.$store.dispatch('growl/success', {
+          title: 'Backup Started',
+          message: `A backup has been successfully ${phrase}.`,
         }, { root: true });
-      }.bind(this));
-    },
-    async resumePolicy(){
-      let networkRequest = await getCloudCasaRequest(this.$store);
-      networkRequest.method = 'POST';
-      networkRequest.url = networkRequest.url + 'policies/' + this.copyDef + 
-        '/action/resume';
-      
-      return await this.$store.dispatch(
-        'management/request', 
-        networkRequest, 
-        { root: true },
-      ).catch(function(error){
+      }.bind(this)).catch(function(error){
+        console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Failed to pause the backup policy`,
@@ -126,7 +145,7 @@ export default {
 <template>
    <ButtonDropdown
     :buttonLabel="this.buttonLabel"
-    :dropdownOptions="this.dropdownOptions"
+    :dropdownOptions="this.getDropdownOptions"
     size="sm"
     :selectable="selectable"
     @click-action="(o) => routeDropdownClick(o)"

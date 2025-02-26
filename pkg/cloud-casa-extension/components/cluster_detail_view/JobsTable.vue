@@ -365,7 +365,6 @@ export default {
         this.restoresTableData.push(newJobset);
       }
     },
-
     async getCloudCasaBackupData(cloudCasaClusterId){
       let networkRequest = await getCloudCasaRequest(this.$store);
       networkRequest.method = 'GET';
@@ -502,6 +501,7 @@ export default {
 
         let rawDuration = cloudCasaActivityData._items[i].end_time - 
           cloudCasaActivityData._items[i].start_time;
+        console.log(rawDuration);
         let parsedDuration = this.msToTime(rawDuration);
 
         let newJobset = new Object;
@@ -529,7 +529,7 @@ export default {
       }
     },
     msToTime(duration){
-      if (duration < 60000){
+      if (duration < 60000 || isNaN(duration)){
         return '-';  
       }
 
@@ -565,6 +565,8 @@ export default {
         newJobset.name = rawData._items[i].name;
         newJobset.policy = copyPolicy;
         newJobset.copyDef = rawData._items[i].copydef;
+        newJobset.etag = rawData._items[i]._etag;
+        newJobset.pause = rawData._items[i].pause;
         newJobset.lastRunTime = parsedDate;
         if (rawData._items[i].status != undefined)
           newJobset.lastThreeRuns = rawData._items[i].status.jobs
@@ -595,7 +597,12 @@ export default {
           <LastThreeRuns :jobs="row.lastThreeRuns" />
         </template>
         <template #cell:actionsDropdownButton="{ row }">
-          <CloudcasaActions :backupId="row.id" :copyDef="row.copyDef"/>
+          <CloudcasaActions 
+            :backupId="row.id" 
+            :copyDef="row.copyDef"
+            :etag="row.etag"
+            :pause="row.pause"
+          />
         </template>
         <template #cell:detailsButton="{ row }">
           <a 
