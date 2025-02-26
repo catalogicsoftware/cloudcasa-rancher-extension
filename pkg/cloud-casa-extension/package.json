@@ -9,6 +9,7 @@
       "catalog.cattle.io/ui-extensions-version": ">= 3.0.0 < 4.0.0"
     }
   },
+  "icon": "https://github.com/catalogicsoftware/cloudcasa-rancher-extension/blob/main/pkg/cloud-casa-extension/icon.svg",
   "private": false,
   "scripts": {},
   "engines": {
