@@ -95,10 +95,36 @@ export default defineComponent({
   },
 })
 </script>
-<template>
+<template class="max-width">
   <div v-if="hasCloudCasaKeyState == 1">
     <div class="text-center">
       <h1>Checking For CloudCasa API Key...</h1>
     </div>
   </div>
 </template>
+<style>
+
+  .max-width{
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  @media screen and (min-width: 1920px) {
+    .max-width {
+      width: 100%;
+    }
+  }
+  
+  @media screen and (min-width: 2048px) {
+    .max-width {
+      width: 95%;
+    }
+  }
+  
+  @media screen and (min-width: 3840px) {
+    .max-width {
+      width: 85%;
+    }
+  }
+
+</style>

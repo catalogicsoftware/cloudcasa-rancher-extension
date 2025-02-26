@@ -287,13 +287,6 @@ export default defineComponent({
     text-align: center;
   }
 
-  .max-width{
-    width: 70%;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
   .flex-box{
     display: flex;
     flex-direction: row;

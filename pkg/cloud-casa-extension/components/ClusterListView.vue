@@ -305,13 +305,6 @@ export default defineComponent({
     width: 100%;
   }
 
-  .max-width{
-    width: 70%;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;  
-  }
-
   .header{
     display: flex;
     margin-bottom: 1rem;

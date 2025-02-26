@@ -2,6 +2,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons'
 
+import CloudcasaActions from './CloudcasaActions.vue';
 import LastThreeRuns from './LastThreeRuns.vue';
 
 import Tabbed from '@shell/components/Tabbed';
@@ -9,12 +10,17 @@ import Tab from '@shell/components/Tabbed/Tab';
 import SortableTable from '@shell/components/SortableTable';
 
 import { CLOUDCASA_URL } from './../../types/types.js';
-import { getCloudCasaRequest, getCloudCasaApiKey } from './../../modules/network.js';
+import { 
+  getCloudCasaRequest, 
+  getCloudCasaEndpoint, 
+  getCloudCasaApiKey,
+} from './../../modules/network.js';
 
 export default {
   layout: 'plain',
   name: 'detailed-cluster-tabbed-table',
   components: {
+    CloudcasaActions,
     FontAwesomeIcon,
     LastThreeRuns,
     SortableTable,
@@ -31,6 +37,50 @@ export default {
   },
   data() {
     return {
+      tableBackupHeaders: [
+        {
+          name: 'name',
+          label: 'Name',
+          value: 'name',
+          width: '25%',
+        },
+        {
+          name: 'policy',
+          label: 'Policy',
+          value: 'policy',
+          width: '15%',
+        },
+        {
+          name: 'lastRunTime',
+          label: 'Last Run Time',
+          value: 'lastRunTime',
+          width: '20%',
+          sort: [
+            "lastRunTime"
+          ]
+        },
+        {
+          name: 'lastThreeRuns',
+          label: 'Last 3 Runs',
+          value: 'lastThreeRuns',
+          width: '10%',
+        },
+        {
+          name: 'spacing',
+          label: ' ',
+          width: '20%',
+        },
+        {
+          name: 'actionsDropdownButton',
+          label: ' ',
+          width: '5%',
+        },
+        {
+          name: 'detailsButton',
+          label: ' ',
+          width: '5%',
+        },
+      ],
       tableData: [],
       tableHeaders: [
         {
@@ -500,8 +550,6 @@ export default {
         let copyPolicy = '';
         if (rawData._items[i].copy_policy != undefined) {
           copyPolicy = rawData._items[i].copy_policy.name;
-        }else{
-          copyPolicy = '-';
         }
 
         let parsedDate = 'No Data Available';
@@ -516,6 +564,7 @@ export default {
         newJobset.id = rawData._items[i]._id;
         newJobset.name = rawData._items[i].name;
         newJobset.policy = copyPolicy;
+        newJobset.copyDef = rawData._items[i].copydef;
         newJobset.lastRunTime = parsedDate;
         if (rawData._items[i].status != undefined)
           newJobset.lastThreeRuns = rawData._items[i].status.jobs
@@ -535,7 +584,7 @@ export default {
     >
       <SortableTable paging
         :rows="this.getBackupData"
-        :headers="this.tableHeaders"
+        :headers="this.tableBackupHeaders"
         :search="false"
         :table-actions="false"
         :row-actions="false"
@@ -544,6 +593,9 @@ export default {
       >
         <template #cell:lastThreeRuns="{ row }">
           <LastThreeRuns :jobs="row.lastThreeRuns" />
+        </template>
+        <template #cell:actionsDropdownButton="{ row }">
+          <CloudcasaActions :backupId="row.id" :copyDef="row.copyDef"/>
         </template>
         <template #cell:detailsButton="{ row }">
           <a 
