@@ -3,7 +3,7 @@ import { defineComponent } from 'vue';
 import DashboardButton from './DashboardButton.vue';
 import InstallButton from './cluster_list_view/InstallButton.vue';
 import ClusterState from './cluster_list_view/ClusterState.vue';
-import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
+import { CRD_NAME, CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 
 import SortableTable from '@shell/components/SortableTable';
 import { BadgeState } from '@components/BadgeState';
@@ -12,6 +12,12 @@ import { MANAGEMENT } from '@shell/config/types';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faTriangleExclamation, faGear } from '@fortawesome/free-solid-svg-icons'
  
+import { 
+  getCloudCasaApiKey, 
+  getCloudCasaRequest, 
+  getCloudCasaEndpoint,
+} from './../modules/network.js';
+
 export default defineComponent({
   layout: 'plain',
   components: {
@@ -30,6 +36,7 @@ export default defineComponent({
   },
   data() {
     return {
+      dashboardName: 'CloudCasa Dashboard',
       tableHeaders: [
         {
           name: 'id',
@@ -61,32 +68,35 @@ export default defineComponent({
         {
           name: 'spacing',
           label: ' ',
-          width: '20%',
+          width: '10%',
         },
         {
           name: 'additionalText',
           label: ' ',
-          width: '12%',
+          width: '10%',
         },
         {
           name: 'install',
           label: ' ',
-          width: '3%',
+          width: '15%',
         },
 
       ],
+      mainDashboardLink: '',
       parsedClusterData: [],
-      mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
       cloudCasaApiKey: '',
       loadingClusters: false,
     };
   },
-  //Need to split this up
   async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '') 
+      + 'dashboard';
+
     this.loadingClusters = true;
     const cloudCasaApiKeyResponse = await this.$store.dispatch(
       'management/findAll', 
-      { type: 'cloudcasa.rancher.io.configuration' },
+      { type: CRD_NAME },
     );
 
     if (cloudCasaApiKeyResponse.length != 0) {
@@ -161,13 +171,16 @@ export default defineComponent({
       });
     },
     async getCloudCasaClusterData(){
+      let cloudCasaApiKey = await getCloudCasaApiKey(this.$store);
+      let cloudCasaEndpoint = await getCloudCasaEndpoint(this.$store);
+      
       let headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
+        'x-api-auth-header': `Bearer ${ cloudCasaApiKey }` 
       };
       let method = 'GET';
-      let url = CLOUDCASA_URL + 'kubeclusters';
+      let url = CLOUDCASA_URL + cloudCasaEndpoint + 'kubeclusters';
       const cloudCasaResponse = await this.$store.dispatch('management/request', {
         url,
         method,
@@ -237,7 +250,10 @@ export default defineComponent({
              >
               Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
             </a>
-            <DashboardButton :dashboardLink="this.mainDashboardLink" />
+            <DashboardButton 
+              :dashboardName="this.dashboardName"
+              :dashboardLink="this.mainDashboardLink" 
+            />
           </div>
         </div>
         <div v-if="!this.loadingClusters">
@@ -290,13 +306,6 @@ export default defineComponent({
 <style scoped>
   .center-all{
     width: 100%;
-  }
-
-  .max-width{
-    width: 70%;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;  
   }
 
   .header{

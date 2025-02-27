@@ -1,4 +1,5 @@
 <script>
+import { MANAGEMENT } from '@shell/config/types';
 import { defineComponent } from 'vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -7,9 +8,9 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 import { Banner } from '@components/Banner';
 import SimpleBox from '@shell/components/SimpleBox';
 import { LabeledInput } from '@components/Form/LabeledInput';
-import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
+import { CLOUDCASA_URL, PRODUCT_NAME, CRD_NAME } from './../types/types.js';
 
-import { getCloudCasaApiKey } from './../modules/network.js';
+import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
@@ -21,7 +22,6 @@ export default defineComponent({
     Banner,
     SimpleBox,
     LabeledInput,
-    getCloudCasaApiKey
   },
   setup(){
     return {
@@ -30,12 +30,15 @@ export default defineComponent({
   },
   data() {
     return {
+      cloudCasaApiEndpoint: 'home.cloudcasa.io/api/v1/',
       cloudCasaApiKey: '',
       doesAPiKeyExist: false,
     }
   },
   async mounted() {
-    const cloudCasaApiKey = await this.findCloudCasaApiKey();
+    await this.findCloudCasaApiKey().catch(function(error){
+      console.log(error);
+    });
   },
   methods: {
     async findCloudCasaApiKey(){
@@ -51,7 +54,7 @@ export default defineComponent({
 
       const findExistingConfig = await this.$store.dispatch(
         'management/findAll', 
-        { type: 'cloudcasa.rancher.io.configuration' },
+        { type: CRD_NAME },
       ).catch(function(error){
         console.log(error);
       });
@@ -61,13 +64,14 @@ export default defineComponent({
         //Setup data struct to send to rancher
         const config = {
           metadata: { 
-            name: `configurations.rancher.io.cloudcasa`, 
+            name: CRD_NAME, 
             namespace: 'default',
           },
           spec: {
+            apiEndpoint: this.cloudCasaApiEndpoint,
             apiToken: this.cloudCasaApiKey
           },
-          type: 'cloudcasa.rancher.io.configuration',
+          type: CRD_NAME,
         };
 
         currentConfig = await this.$store.dispatch('management/create', config);
@@ -75,38 +79,48 @@ export default defineComponent({
       }else{
         currentConfig = findExistingConfig[0];
         currentConfig.spec.apiToken = this.cloudCasaApiKey;
+        currentConfig.spec.apiEndpoint = this.cloudCasaApiEndpoint;
       }
 
       return currentConfig;
     },
-    async saveApiKey(){
-      //Grab configuration (should exist since index.vue handles this)
-      let currentConfig = await this.findExistingConfig()
+    async saveApiInformation(){
+      let nodeDriver = await this.ensureCloudCasaNodeDriver(this.cloudCasaApiEndpoint);
+      let whitelistUp = await this.ensuretGlobalWhitelist(
+        nodeDriver, 
+        this.cloudCasaApiEndpoint,
+      );
+      
+      /*use nodeDriverUp, whitelistUp for initial screen, if false, don't allow 
+      user forward*/
+      //console.log(nodeDriverUp, whitelistUp);
 
-      //Save key
-      currentConfig.save().then(_ => {
-        let headers = {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }` 
-        };
-        let method = 'GET';
-        let url = CLOUDCASA_URL + 'kubeclusters';
+      let headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-api-auth-header': `Bearer ${ this.cloudCasaApiKey }`
+      };
+      let method = 'GET';
+      let url = CLOUDCASA_URL + this.cloudCasaApiEndpoint + 'kubeclusters';
 
-        this.$store.dispatch(
-          'management/request', 
-          {
-            url,
-            method,
-            headers,
-            redirectUnauthorized: false,
-          }, 
-          { root: true },
-        //If the key works against a CloudCasa endpoint, continue to cluster list
-        ).then(function(){
+      this.$store.dispatch(
+        'management/request',
+        {
+          url,
+          method,
+          headers,
+          redirectUnauthorized: false,
+        },
+        { root: true },
+      //If the key works against a CloudCasa endpoint, continue to cluster list
+      ).then(async function(){
+        //Grab configuration (should exist since index.vue handles this)
+        let currentConfig = await this.findExistingConfig();
+
+        currentConfig.save().then(_ => {
           this.$router.push('/' + PRODUCT_NAME + '/dashboard');
         //If something is wrong with the key, show the growl
-        }.bind(this)).catch(function(error){
+        }).catch(function(error){
           console.log(error);
           this.$store.dispatch('growl/error', {
             title: 'Invalid API Key',
@@ -114,9 +128,8 @@ export default defineComponent({
             the input box below`,
           }, { root: true });
         }.bind(this));
-
       //If something is wrong with the key, show the growl
-      }).catch(function(error){
+      }.bind(this)).catch(function(error){
         console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Invalid API Key',
@@ -124,6 +137,75 @@ export default defineComponent({
           the input box below`,
         }, { root: true });
       }.bind(this));
+    },
+    async ensuretGlobalWhitelist(nodeDriver, url){
+      const whitelist = await this.$store.dispatch(
+        'management/findAll', 
+        { type: MANAGEMENT.SETTING },
+      );
+
+      const setting = whitelist.find(s => s.value === url);
+      
+      if (setting != undefined) {
+        return true;
+      }
+      
+      try {
+        await nodeDriver.whitelistDomains.push(url);
+        return true;
+      } catch(error) {
+        console.log(error);
+        return false;
+      }
+
+      return true;
+    },
+    async ensureCloudCasaNodeDriver(url){
+      const nodeDrivers = await this.$store.dispatch(
+        'rancher/findAll',
+        { type: 'nodeDriver' },
+        { root: true }
+      ).catch(function(error){
+        console.log(error);
+      });
+
+      const cloudCasaDriver = nodeDrivers.find(
+          (driver) => this.isCloudCasaDriverName(driver.name) 
+        ) ||
+          (await this.newNodeDriver()
+      );
+
+      if (!cloudCasaDriver.whitelistDomains) {
+        cloudCasaDriver.whitelistDomains = [];
+      }
+
+      // Already in the whitelist
+      if (cloudCasaDriver.whitelistDomains.find((domain) => domain === url)) {
+        return true;
+      }
+
+      cloudCasaDriver.state = 'active';
+      cloudCasaDriver.url = 'https://' + url;
+      cloudCasaDriver.whitelistDomains.push(url.split('/')[0]);
+      cloudCasaDriver.whitelistDomains.push('api.cloudcasa.io');
+
+      try {
+        return await cloudCasaDriver.save();
+      } catch(error) {
+        console.log(error);
+        return false;
+      }
+    },
+    async newNodeDriver(){
+      const emptyDriver = {
+        name: this.name,
+        type: 'nodeDriver',
+      };
+
+      return await this.$store.dispatch('rancher/create', emptyDriver);
+    },
+    isCloudCasaDriverName(name){
+      return name === this.name;
     },
     routeToMainPage(){
       this.$router.push('/' + PRODUCT_NAME + '/dashboard');
@@ -161,6 +243,16 @@ export default defineComponent({
         <div class="flex-item">
           <SimpleBox class="simplebox-centering">
              <LabeledInput 
+              subLabel="The default api endpoint is 'api.cloudcasa.io/api/v1/'. For private CloudCasa instances replace the default api endpoint."
+              class="key-input"
+              type="text" 
+              v-model:value="cloudCasaApiEndpoint"
+              required
+            >
+              <template #label>CloudCasa API Endpoint</template>
+            </LabeledInput>
+            <div class="m-50"></div>
+            <LabeledInput 
               class="key-input"
               type="text" 
               v-model:value="cloudCasaApiKey"
@@ -170,9 +262,9 @@ export default defineComponent({
             </LabeledInput>
             <button
               class="btn role-primary btn-save-api-key"
-              @click="saveApiKey()"
+              @click="saveApiInformation()"
             >
-              Save API Key
+              Save API Configuration
             </button>
           </SimpleBox>
         </div>
@@ -188,13 +280,6 @@ export default defineComponent({
   .center-all{
     width: 100%;
     text-align: center;
-  }
-
-  .max-width{
-    width: 70%;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
   }
 
   .flex-box{

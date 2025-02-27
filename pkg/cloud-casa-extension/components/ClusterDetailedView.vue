@@ -13,7 +13,11 @@ import SortableTable from '@shell/components/SortableTable';
 import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 import { MANAGEMENT } from '@shell/config/types';
 
-import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { 
+  getCloudCasaRequest, 
+  getCloudCasaApiKey,
+  getCloudCasaEndpoint,
+} from './../modules/network.js';
 
 export default {
   layout: 'plain',
@@ -34,13 +38,19 @@ export default {
   },
   data() {
     return {
+      dashboardName: 'CloudCasa Cluster Dashboard',
       cluster: null,
       ccid: null,
       clusterServices: null,
       clusterCloudCasaData: null,
+      mainDashboardLink: '',
     }
   },
   async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '') 
+      + 'overview/' + this.cloudCasaClusterId + '/backups';
+
     this.cluster = await this.getCluster(this.clusterId);
 
     if (this.cluster != undefined) {
@@ -76,10 +86,6 @@ export default {
     },
     cloudCasaClusterId(){
       return this.$route.params.ccid;
-    },
-    cloudCasaLink(){
-      return 'https://home.cloudcasa.io/clusters/overview/' + 
-        this.cloudCasaClusterId + '/backups';
     },
   },
   methods: {
@@ -150,7 +156,10 @@ export default {
           <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
         </div>
         <div class="section actions">
-          <DashboardButton :dashboardLink="this.cloudCasaLink" />
+          <DashboardButton 
+            :dashboardName="this.dashboardName"
+            :dashboardLink="this.mainDashboardLink" 
+          />
         </div>
       </div>
       <div v-if="this.installState === 3" class="custom-badge green">
@@ -183,13 +192,6 @@ export default {
 
   .center-all{
     width: 100%;
-  }
-
-  .max-width{
-    width: 70%;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;  
   }
 
   .light-gray{

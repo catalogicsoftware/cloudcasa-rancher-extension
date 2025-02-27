@@ -12,7 +12,7 @@ const cloudCasaStoreFactory = (config: CloudCasaState): CoreStoreSpecifics => {
   return {
     state: (): CloudCasaState => {
       return {
-        name: config.name,
+        apiEndpoint: config.name,
         apiToken: config.apiToken,
       };
     },
@@ -26,7 +26,7 @@ const config: CoreStoreConfig = { namespace: "cloudcasa" };
 
 export default {
   specifics: cloudCasaStoreFactory({
-    name: '',
+    apiEndpoint: '',
     apiToken: '',
   }),
   config,
