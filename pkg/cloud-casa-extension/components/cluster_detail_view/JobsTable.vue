@@ -268,10 +268,14 @@ export default {
           label: ' ',
           width: '5%',
         },
-      ]
+      ],
+      mainDashboardLink: '',
     }
   },
   async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '');
+
     const restoresData = await this.getCloudCasaRestoresData(
       this.cloudCasaClusterId,
     );
@@ -311,23 +315,27 @@ export default {
       console.log('TEST');
     },
     getBackupsLink(id){
-      return 'https://home.cloudcasa.io/clusters/backups/' + id + '/activity';
+      return this.mainDashboardLink + 'clusters/backups/' + id + 
+        '/activity';
     },
     getRestoresLink(id){
-      return 'https://home.cloudcasa.io/clusters/restores/' + id + '/activity';
+      return this.mainDashboardLink + 'clusters/restores/' + id + 
+        '/activity';
     },
     getMigrationsLink(id){
-      return 'https://home.cloudcasa.io/clusters/migrations/' + id + '/activity';
+      return this.mainDashboardLink + 'clusters/migrations/' + id + 
+        '/activity';
     },
     getReplicationsLink(id){
-      return 'https://home.cloudcasa.io/clusters/replications/' + id + '/activity';
+      return this.mainDashboardLink + 'clusters/replications/' + id 
+        + '/activity';
     },
     getRecoveryLink(id){
-      return 'https://home.cloudcasa.io/clusters/overview/' + 
+      return this.mainDashboardLink + 'clusters/overview/' + 
         this.cloudCasaClusterId + '/recovery-points';
     },
     getActivityLink(id){
-      return 'https://home.cloudcasa.io/clusters/overview/' + 
+      return this.mainDashboardLink + 'clusters/overview/' + 
         this.cloudCasaClusterId + '/activity(sidebar:job/' + id + ')';
     },
     async getCloudCasaRestoresData(){
@@ -357,8 +365,8 @@ export default {
 
         let newJobset = new Object;
         newJobset.id = cloudCasaRestoreData._items[i]._id;
-        newJobset.restoreLink = 'https://home.cloudcasa.io/clusters/restores/' + 
-          cloudCasaRestoreData._items[i]._id + '/activity';
+        newJobset.restoreLink = 'https://' + this.mainDashboardLink + 
+          'clusters/restores/' + cloudCasaRestoreData._items[i]._id + '/activity';
         newJobset.name = cloudCasaRestoreData._items[i].name;
         newJobset.lastRunTime = parsedDate;
 
@@ -501,7 +509,7 @@ export default {
 
         let rawDuration = cloudCasaActivityData._items[i].end_time - 
           cloudCasaActivityData._items[i].start_time;
-        console.log(rawDuration);
+        
         let parsedDuration = this.msToTime(rawDuration);
 
         let newJobset = new Object;

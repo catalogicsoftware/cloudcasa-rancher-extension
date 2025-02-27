@@ -13,7 +13,11 @@ import SortableTable from '@shell/components/SortableTable';
 import { CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 import { MANAGEMENT } from '@shell/config/types';
 
-import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { 
+  getCloudCasaRequest, 
+  getCloudCasaApiKey,
+  getCloudCasaEndpoint,
+} from './../modules/network.js';
 
 export default {
   layout: 'plain',
@@ -39,9 +43,14 @@ export default {
       ccid: null,
       clusterServices: null,
       clusterCloudCasaData: null,
+      mainDashboardLink: '',
     }
   },
   async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '') 
+      + 'overview/' + this.cloudCasaClusterId + '/backups';
+
     this.cluster = await this.getCluster(this.clusterId);
 
     if (this.cluster != undefined) {
@@ -77,10 +86,6 @@ export default {
     },
     cloudCasaClusterId(){
       return this.$route.params.ccid;
-    },
-    cloudCasaLink(){
-      return 'https://home.cloudcasa.io/clusters/overview/' + 
-        this.cloudCasaClusterId + '/backups';
     },
   },
   methods: {
@@ -153,7 +158,7 @@ export default {
         <div class="section actions">
           <DashboardButton 
             :dashboardName="this.dashboardName"
-            :dashboardLink="this.cloudCasaLink" 
+            :dashboardLink="this.mainDashboardLink" 
           />
         </div>
       </div>

@@ -23,7 +23,12 @@ export default {
       buttonLabel: 'Actions',
       localPause: this.pause,
       localEtag: this.etag,
+      mainDashboardLink: '',
     }
+  },
+  async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = endpoint.replace('api/v1/', '');
   },
   computed: {
     getDropdownOptions(){
@@ -80,7 +85,7 @@ export default {
           title: 'Backup Started',
           message: `A backup has been successfully started.`,
         }, { root: true });
-      }).catch(function(error){
+      }.bind(this)).catch(function(error){
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Failed to start backup job.`,
@@ -127,15 +132,15 @@ export default {
     },
     restoreLinkTo(){
       window.open(
-        'https://home.cloudcasa.io/clusters/backups/' + this.backupId + 
-          '/recovery-points', 
+        'https://' + this.mainDashboardLink + 'clusters/backups/' + 
+          this.backupId + '/recovery-points', 
         '_blank',
       );
     },
     editLinkTo(){
       window.open(
-        'https://home.cloudcasa.io/clusters/backups/' + this.backupId + 
-          '/activity', 
+        'https://' + this.mainDashboardLink + 'clusters/backups/' + 
+          this.backupId + '/activity', 
         '_blank',
       );
     },

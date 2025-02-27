@@ -30,7 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
-      cloudCasaApiEndpoint: 'api.cloudcasa.io/api/v1/',
+      cloudCasaApiEndpoint: 'home.cloudcasa.io/api/v1/',
       cloudCasaApiKey: '',
       doesAPiKeyExist: false,
     }
@@ -85,8 +85,11 @@ export default defineComponent({
       return currentConfig;
     },
     async saveApiInformation(){
-      let nodeDriverUp = await this.ensureCloudCasaNodeDriver(this.cloudCasaApiEndpoint);
-      let whitelistUp = await this.ensuretGlobalWhitelist(this.cloudCasaApiEndpoint);
+      let nodeDriver = await this.ensureCloudCasaNodeDriver(this.cloudCasaApiEndpoint);
+      let whitelistUp = await this.ensuretGlobalWhitelist(
+        nodeDriver, 
+        this.cloudCasaApiEndpoint,
+      );
       
       /*use nodeDriverUp, whitelistUp for initial screen, if false, don't allow 
       user forward*/
@@ -135,7 +138,7 @@ export default defineComponent({
         }, { root: true });
       }.bind(this));
     },
-    async ensuretGlobalWhitelist(url){
+    async ensuretGlobalWhitelist(nodeDriver, url){
       const whitelist = await this.$store.dispatch(
         'management/findAll', 
         { type: MANAGEMENT.SETTING },
@@ -146,18 +149,10 @@ export default defineComponent({
       if (setting != undefined) {
         return true;
       }
-
+      
       try {
-        this.$store.dispatch('management/request', {
-          url: `v1/${ MANAGEMENT.SETTING }`,
-          method: 'POST', 
-          data: {
-            metadata: {
-              name: 'cloudcasa-whitelist-domain-v2',
-            },
-            value: url,
-          },
-        })
+        await nodeDriver.whitelistDomains.push(url);
+        return true;
       } catch(error) {
         console.log(error);
         return false;
@@ -192,10 +187,10 @@ export default defineComponent({
       cloudCasaDriver.state = 'active';
       cloudCasaDriver.url = 'https://' + url;
       cloudCasaDriver.whitelistDomains.push(url.split('/')[0]);
+      cloudCasaDriver.whitelistDomains.push('api.cloudcasa.io');
 
       try {
-        await cloudCasaDriver.save();
-        return true;
+        return await cloudCasaDriver.save();
       } catch(error) {
         console.log(error);
         return false;

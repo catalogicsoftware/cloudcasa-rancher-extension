@@ -68,28 +68,31 @@ export default defineComponent({
         {
           name: 'spacing',
           label: ' ',
-          width: '20%',
+          width: '10%',
         },
         {
           name: 'additionalText',
           label: ' ',
-          width: '12%',
+          width: '10%',
         },
         {
           name: 'install',
           label: ' ',
-          width: '3%',
+          width: '15%',
         },
 
       ],
+      mainDashboardLink: '',
       parsedClusterData: [],
-      mainDashboardLink: 'https://home.cloudcasa.io/dashboard',
       cloudCasaApiKey: '',
       loadingClusters: false,
     };
   },
-  //Need to split this up
   async mounted() {
+    let endpoint = await getCloudCasaEndpoint(this.$store);
+    this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '') 
+      + 'dashboard';
+
     this.loadingClusters = true;
     const cloudCasaApiKeyResponse = await this.$store.dispatch(
       'management/findAll', 

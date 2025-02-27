@@ -120,7 +120,6 @@ export default {
         console.log('Did not find cluster in CloudCasa', error);
         this.localSetInstallState(1);
       }.bind(this));
-
     },
     async installCloudCasaAgent(clusterId, cloudCasaId, agentURL){
       //Get config file from CloudCasa
@@ -156,6 +155,25 @@ export default {
         this.localSetInstallState(4);
       }.bind(this));
     },
+    async uninstallCloudCasaAgent(){
+      return await this.$store.dispatch('cluster/request', {
+        url: `/v1/namespace/cloudcasa-io`,
+        method: 'DELETE',
+      }).then(function(){
+        this.$store.dispatch('growl/success', {
+          title: 'Agent Removed',
+          message: `The CloudCasa Agent has been successfully removed.`,
+        }, { root: true });
+        this.localSetInstallState(0);
+      }.bind(this)).catch(function(error){
+        console.log(error);
+        this.$store.dispatch('growl/error', {
+          title: 'Something Went Wrong',
+          message: `The CloudCasa Agent was not removed, make sure it still exists.`,
+        }, { root: true });
+      }.bind(this));
+
+    },
     routeToDetailedPage(id, ccid){
       this.$router.push('/CloudCasa/c/' + id + '/' + ccid);
     }
@@ -182,20 +200,39 @@ export default {
       Install <FontAwesomeIcon v-if="row.installState === 2" :icon="faSpinner" spin />
     </span>
   </button>
-  <a
-    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
-    class="btn role-secondary"
-    v-if="row.installState === 3"
-  >
-    View Details
-  </a>
-  <a
-    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
-    class="btn role-secondary"
-    v-if="row.installState === 4"
-  >
-    View Details
-  </a>
+  <div v-if="row.installState === 3">
+    <a
+      @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
+      class="btn role-secondary"
+      
+    >
+      View Details
+    </a>
+    <button
+      class="btn role-primary" 
+      @click="uninstallCloudCasaAgent(row.cloudCasaId)"
+    >
+      <span>
+        Uninstall
+      </span>
+    </button>
+  </div>
+  <div v-if="row.installState === 4">
+    <a
+      @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
+      class="btn role-secondary"
+    >
+      View Details
+    </a>
+    <button
+      class="btn role-primary" 
+      @click="uninstallCloudCasaAgent(row.cloudCasaId)"
+    >
+      <span>
+        Uninstall
+      </span>
+    </button>
+  </div>
 </template>
 <style scoped>
 </style>
