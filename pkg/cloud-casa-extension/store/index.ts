@@ -4,7 +4,7 @@ import mutations from './mutations';
 import actions from './actions';
 
 export interface CloudCasaState {
-  name?: string;
+  apiEndpoint?: string;
   apiToken?: string;
 }
 
@@ -12,7 +12,7 @@ const cloudCasaStoreFactory = (config: CloudCasaState): CoreStoreSpecifics => {
   return {
     state: (): CloudCasaState => {
       return {
-        apiEndpoint: config.name,
+        apiEndpoint: config.apiEndpoint,
         apiToken: config.apiToken,
       };
     },

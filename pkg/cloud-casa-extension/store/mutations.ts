@@ -5,6 +5,6 @@ export default {
     state.apiToken = val;
   },
   setApiName(state: CloudCasaState, val: string) {
-    state.apiName = val;
+    state.apiEndpoint = val;
   }
 };
