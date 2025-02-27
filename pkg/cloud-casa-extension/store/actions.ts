@@ -3,6 +3,6 @@ export default {
     commit('setApiToken', apiToken);
   },
   setApiEndpoint: ({ commit }: any, apiEndpoint: string) => {
-    commit('setApiToken', apiName);
+    commit('setApiToken', apiEndpoint);
   }
 };
