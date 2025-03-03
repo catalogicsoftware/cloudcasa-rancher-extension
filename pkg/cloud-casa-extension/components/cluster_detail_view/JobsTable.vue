@@ -770,7 +770,6 @@ svg{
 }
 
 .tabs .tab span{
-  font-size: 16px;
   text-align: center;
   padding: 5px;
 }

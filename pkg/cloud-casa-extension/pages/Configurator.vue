@@ -334,6 +334,5 @@ export default defineComponent({
   .back-button {
     float: left;
     margin-bottom: 10px;
-    font-size: 20px;
   }
 </style>

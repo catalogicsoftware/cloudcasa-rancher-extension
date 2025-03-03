@@ -186,10 +186,6 @@ export default {
     margin-right: 10px;
   }
 
-  a{
-    font-size: 20px;
-  }
-
   .center-all{
     width: 100%;
   }

@@ -332,12 +332,10 @@ export default defineComponent({
   }
 
   .green-text{
-    font-size: 20px;
     color: var(--success);
   }
   
   .yellow-text{
-    font-size: 20px;
     color: var(--warning);
   }
 
@@ -379,7 +377,6 @@ export default defineComponent({
   }
 
   .reconfigure-button{
-    font-size: 20px; 
     margin-left: 15px;
   }
 </style>
