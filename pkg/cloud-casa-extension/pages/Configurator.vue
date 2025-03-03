@@ -32,6 +32,7 @@ export default defineComponent({
     return {
       cloudCasaApiEndpoint: 'home.cloudcasa.io/api/v1/',
       cloudCasaApiKey: '',
+      isCloudCasaApiKeyValid: false,
       doesAPiKeyExist: false,
     }
   },
@@ -209,6 +210,22 @@ export default defineComponent({
     },
     routeToMainPage(){
       this.$router.push('/' + PRODUCT_NAME + '/dashboard');
+    },
+    validateCloudCasaApiKeyInput() {
+      //Wait for input to update before testing it
+      setTimeout(() => {
+        const regex = /^[a-zA-Z0-9-_]+$/;
+        if (!regex.test(this.cloudCasaApiKey)) {
+          this.isCloudCasaApiKeyValid = false;
+        } else if (
+          this.cloudCasaApiKey.length < 100 || 
+          this.cloudCasaApiKey.length > 255
+        ){ 
+          this.isCloudCasaApiKeyValid = false;
+        } else {
+          this.isCloudCasaApiKeyValid = true;
+        }
+      }, 1000);
     }
   },
 })
@@ -236,14 +253,38 @@ export default defineComponent({
             <h1>Welcome to the CloudCasa Extension!</h1>
             <h3>In order to get started you will need a CloudCasa API Key. To set 
               that up follow 
-              <a href="https://docs.cloudcasa.io/help/apikeys.html">this guide</a>.
+              <a 
+                href="https://docs.cloudcasa.io/help/apikeys.html"
+                target="_Blank"
+              >
+                this guide
+              </a>.
             </h3>
+            <div class="m-25"></div>
+            <h1>Documentation & Help</h1>
+            <a 
+              href="https://docs.cloudcasa.io/help/rancher-installation.html"
+              target="_Blank"
+            >
+              Rancher Extension CloudCasa Installation Guide
+            </a>
+            <div class="m-25"></div>
+            <a 
+              href="https://docs.cloudcasa.io/help/rancher.html" 
+              target="_Blank"
+            >
+              Rancher Extension CloudCasa User Guide
+            </a>
+            <div class="m-25"></div>
+            <a href="https://docs.cloudcasa.io/help/" target="_Blank">
+              CloudCasa Help
+            </a>
           </SimpleBox>
         </div>
         <div class="flex-item">
           <SimpleBox class="simplebox-centering">
              <LabeledInput 
-              subLabel="The default api endpoint is 'api.cloudcasa.io/api/v1/'. For private CloudCasa instances replace the default api endpoint."
+              subLabel="The default api endpoint is 'home.cloudcasa.io/api/v1/'. For private CloudCasa instances replace the default api endpoint."
               class="key-input"
               type="text" 
               v-model:value="cloudCasaApiEndpoint"
@@ -254,15 +295,20 @@ export default defineComponent({
             <div class="m-50"></div>
             <LabeledInput 
               class="key-input"
-              type="text" 
+              type="text"
+              :status="this.isCloudCasaApiKeyValid ? '' : 'error'"
+              :subLabel="this.isCloudCasaApiKeyValid ? '' : 'Ensure the API Key is in the correct format.'"
               v-model:value="cloudCasaApiKey"
+              @input="validateCloudCasaApiKeyInput"
               required
             >
               <template #label>CloudCasa API Key</template>
             </LabeledInput>
+            <div class="m-25"></div>
             <button
               class="btn role-primary btn-save-api-key"
               @click="saveApiInformation()"
+              :disabled="!this.isCloudCasaApiKeyValid"
             >
               Save API Configuration
             </button>
@@ -312,6 +358,5 @@ export default defineComponent({
   .back-button {
     float: left;
     margin-bottom: 10px;
-    font-size: 20px;
   }
 </style>

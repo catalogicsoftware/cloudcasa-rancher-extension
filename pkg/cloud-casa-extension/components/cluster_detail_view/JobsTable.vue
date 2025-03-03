@@ -19,6 +19,7 @@ import {
 export default {
   layout: 'plain',
   name: 'detailed-cluster-tabbed-table',
+  expose: ['getAllClusterDetailData'],
   components: {
     CloudcasaActions,
     FontAwesomeIcon,
@@ -276,22 +277,7 @@ export default {
     let endpoint = await getCloudCasaEndpoint(this.$store);
     this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '');
 
-    const restoresData = await this.getCloudCasaRestoresData(
-      this.cloudCasaClusterId,
-    );
-    const backupData = await this.getCloudCasaBackupData(this.cloudCasaClusterId);
-    const migrationData = await this.getCloudCasaMigrationData(
-      this.cloudCasaClusterId
-    );
-    const replicationData = await this.getCloudCasaReplicationData(
-      this.cloudCasaClusterId
-    );
-    const recoveryData = await this.getCloudCasaRecoveryPointsData(
-      this.cloudCasaClusterId
-    );
-    const activityData = await this.getCloudCasaActivityData(
-      this.cloudCasaClusterId
-    );
+    await this.getAllClusterDetailData();
   },
   computed: {
     getBackupData(){
@@ -311,8 +297,29 @@ export default {
     },
   },
   methods: {
-    handlePaginationChanged(test){
-      console.log('TEST');
+    async getAllClusterDetailData(){
+      //Reset table data arrays in case this is a refresh
+      this.tableData = [];
+      this.restoresTableData = [];
+      this.activityTableData = [];
+      this.recoveryPointsTableData = [];
+
+      const restoresData = await this.getCloudCasaRestoresData(
+        this.cloudCasaClusterId,
+      );
+      const backupData = await this.getCloudCasaBackupData(this.cloudCasaClusterId);
+      const migrationData = await this.getCloudCasaMigrationData(
+        this.cloudCasaClusterId
+      );
+      const replicationData = await this.getCloudCasaReplicationData(
+        this.cloudCasaClusterId
+      );
+      const recoveryData = await this.getCloudCasaRecoveryPointsData(
+        this.cloudCasaClusterId
+      );
+      const activityData = await this.getCloudCasaActivityData(
+        this.cloudCasaClusterId
+      );
     },
     getBackupsLink(id){
       return this.mainDashboardLink + 'clusters/backups/' + id + 
@@ -489,7 +496,7 @@ export default {
     async getCloudCasaActivityData(cloudCasaClusterId){
       let networkRequest = await getCloudCasaRequest(this.$store);
       networkRequest.method = 'GET';
-      networkRequest.url = networkRequest.url + `jobs?sort=-start_time&embedded={"backupdef":1, "restoredef":1, "awsrds.copydef":1}&where={"display_type":{"$nin":["AWSRDS_BACKUP_DELETE","AZURE_METRICS_UPDATE","AGENT_UPDATE"],"$exists":true},"cluster":"${this.cloudCasaClusterId}"}`
+      networkRequest.url = networkRequest.url + `jobs?sort=-start_time&embedded={"backupdef":1, "restoredef":1, "awsrds.copydef":1}&where={"display_type":{"$nin":["AWSRDS_BACKUP_DELETE","AZURE_METRICS_UPDATE","AGENT_UPDATE","DELETE_BACKUP"],"$exists":true},"cluster":"${this.cloudCasaClusterId}"}`
 
       const cloudCasaActivityData = await this.$store.dispatch(
         'management/request', 
@@ -510,7 +517,7 @@ export default {
         let rawDuration = cloudCasaActivityData._items[i].end_time - 
           cloudCasaActivityData._items[i].start_time;
         
-        let parsedDuration = this.msToTime(rawDuration);
+        let parsedDuration = this.unixToTime(rawDuration);
 
         let newJobset = new Object;
         newJobset.id = cloudCasaActivityData._items[i]._id;
@@ -536,21 +543,16 @@ export default {
         return 'No Date Available';
       }
     },
-    msToTime(duration){
-      if (duration < 60000 || isNaN(duration)){
+    unixToTime(duration){
+      if (isNaN(duration)){
         return '-';  
       }
 
-      var milliseconds = Math.floor((duration % 1000) / 100),
-        seconds = Math.floor((duration / 1000) % 60),
-        minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = duration % 60;
 
-      hours = (hours < 10) ? "0" + hours : hours;
-      minutes = (minutes < 10) ? "0" + minutes : minutes;
-      seconds = (seconds < 10) ? "0" + seconds : seconds;
-
-      return hours + "h " + minutes + "m";
+      return hours + "h " + minutes + "m " + seconds + " s";
     },
     //Used for backups, migrations, and replications
     parseCloudCasaJobData(type, rawData){
@@ -599,7 +601,6 @@ export default {
         :table-actions="false"
         :row-actions="false"
         :rowsPerPage="10"
-        @pagination-changed="this.handlePaginationChanged"
       >
         <template #cell:lastThreeRuns="{ row }">
           <LastThreeRuns :jobs="row.lastThreeRuns" />
@@ -770,7 +771,6 @@ svg{
 }
 
 .tabs .tab span{
-  font-size: 16px;
   text-align: center;
   padding: 5px;
 }

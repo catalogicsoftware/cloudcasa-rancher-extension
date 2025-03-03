@@ -1,7 +1,7 @@
 <script>
 import { defineComponent } from 'vue';
 import DashboardButton from './DashboardButton.vue';
-import InstallButton from './cluster_list_view/InstallButton.vue';
+import ClusterActions from './cluster_list_view/ClusterActions.vue';
 import ClusterState from './cluster_list_view/ClusterState.vue';
 import { CRD_NAME, CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
 
@@ -24,7 +24,7 @@ export default defineComponent({
     SortableTable,
     DashboardButton,
     BadgeState,
-    InstallButton,
+    ClusterActions,
     ClusterState,
     FontAwesomeIcon,
   },
@@ -287,7 +287,7 @@ export default defineComponent({
               </div>
             </template>
             <template #cell:install="{ row }">
-              <InstallButton 
+              <ClusterActions 
                 :row="row" 
                 @install-state-func="setInstallState"
                 :cloudCasaApiKey="cloudCasaApiKey" 
@@ -332,12 +332,10 @@ export default defineComponent({
   }
 
   .green-text{
-    font-size: 20px;
     color: var(--success);
   }
   
   .yellow-text{
-    font-size: 20px;
     color: var(--warning);
   }
 
@@ -379,7 +377,6 @@ export default defineComponent({
   }
 
   .reconfigure-button{
-    font-size: 20px; 
     margin-left: 15px;
   }
 </style>

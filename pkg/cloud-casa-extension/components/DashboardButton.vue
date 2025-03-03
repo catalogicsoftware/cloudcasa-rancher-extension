@@ -31,7 +31,4 @@ export default {
   svg {
     margin-left: 10px;
   }
-  a{
-    font-size: 20px;
-  }
 </style>

@@ -3,7 +3,7 @@ import PercentageBar from '@shell/components/PercentageBar';
 
 export default{
   layout: 'plain',
-  name:  'covrage-card-component',
+  name:  'coverage-card-component',
   components: {
     PercentageBar,
   },

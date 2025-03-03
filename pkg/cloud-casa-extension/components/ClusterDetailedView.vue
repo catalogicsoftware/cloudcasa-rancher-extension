@@ -1,10 +1,12 @@
 <script>
+import { ref } from 'vue';
+
 import DashboardButton from './DashboardButton.vue';
 import JobsTable from './cluster_detail_view/JobsTable.vue';
 import CoverageCards from './cluster_detail_view/CoverageCards.vue';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons'
+import { faRefresh, faArrowLeft } from '@fortawesome/free-solid-svg-icons'
 
 import Tabbed from '@shell/components/Tabbed';
 import Tab from '@shell/components/Tabbed/Tab';
@@ -19,6 +21,7 @@ import {
   getCloudCasaEndpoint,
 } from './../modules/network.js';
 
+const jobsTable = ref(0);
 export default {
   layout: 'plain',
   name: 'detailed-cluster-view',
@@ -33,7 +36,8 @@ export default {
   },
   setup(){
     return {
-      faArrowLeft
+      faArrowLeft,
+      faRefresh
     }
   },
   data() {
@@ -44,6 +48,7 @@ export default {
       clusterServices: null,
       clusterCloudCasaData: null,
       mainDashboardLink: '',
+      dataRefreshed: true,
     }
   },
   async mounted() {
@@ -57,9 +62,7 @@ export default {
       this.clusterServices = await this.getClusterServicesData(
         this.cluster.spec.displayName
       );
-      this.clusterCloudCasaData = await this.getCloudCasaData(
-        this.cluster.spec.displayName
-      );
+      await this.getCloudCasaData(this.clusterId);
     }
   },
   computed: {
@@ -89,6 +92,29 @@ export default {
     },
   },
   methods: {
+    async refreshData(){
+      this.dataRefreshed = false;
+      let promises = [];
+
+      promises.push(this.getCloudCasaData());
+      promises.push(this.$refs.jobsTable.getAllClusterDetailData());
+     
+      Promise.all(promises).then(function(){
+        this.$store.dispatch('growl/success', {
+          title: 'Success',
+          message: `Cluster Metrics and table data are refreshed!`,
+        }, { root: true });
+        this.dataRefreshed = true;
+      }.bind(this)).catch(function(error){
+        console.log(error);
+        this.$store.dispatch('growl/error', {
+          title: 'Error',
+          message: `Something went wrong refreshing the data, refresh the page.`,
+        }, { root: true });
+        this.dataRefreshed = true;
+      }.bind(this));
+
+    },
     async getCluster(clusterId){
       return await this.$store.dispatch(`management/find`, {
         type: MANAGEMENT.CLUSTER,
@@ -123,7 +149,9 @@ export default {
         'management/request', 
         networkRequest,
         { root: true },
-      ).catch(function(error){
+      ).then(function(response){
+        this.clusterCloudCasaData = response;
+      }.bind(this)).catch(function(error){
         console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
@@ -156,6 +184,19 @@ export default {
           <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
         </div>
         <div class="section actions">
+          <a 
+            @click="this.refreshData()"
+            class="btn role-primary" 
+            label="Refresh Data"
+            v-bind="{disabled: this.dataRefreshed ? null : true}"
+           >
+            <div v-if="this.dataRefreshed">
+              <FontAwesomeIcon :icon="faRefresh" /> Refresh Data
+            </div>
+            <div v-if="!this.dataRefreshed">
+              <FontAwesomeIcon :icon="faRefresh" spin /> Refresh Data
+            </div>
+          </a>
           <DashboardButton 
             :dashboardName="this.dashboardName"
             :dashboardLink="this.mainDashboardLink" 
@@ -173,7 +214,10 @@ export default {
       <CoverageCards :clusterCloudCasaData="this.clusterCloudCasaData" />
       <div class="m-20"></div>
       <div v-if="this.cloudCasaClusterId != 'Loading...'">
-        <JobsTable :cloudCasaClusterId="this.cloudCasaClusterId" />
+        <JobsTable 
+          ref="jobsTable" 
+          :cloudCasaClusterId="this.cloudCasaClusterId" 
+        />
       </div>
       <div v-else>
         Loading Jobs...
@@ -184,10 +228,6 @@ export default {
 <style scoped>
   svg {
     margin-right: 10px;
-  }
-
-  a{
-    font-size: 20px;
   }
 
   .center-all{
@@ -212,6 +252,7 @@ export default {
 
   .actions a{
     float:right;
+    margin-left: 10px;
   }
 
   .main-spacing{
