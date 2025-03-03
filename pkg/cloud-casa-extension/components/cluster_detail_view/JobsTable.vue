@@ -19,6 +19,7 @@ import {
 export default {
   layout: 'plain',
   name: 'detailed-cluster-tabbed-table',
+  expose: ['getAllClusterDetailData'],
   components: {
     CloudcasaActions,
     FontAwesomeIcon,
@@ -276,22 +277,7 @@ export default {
     let endpoint = await getCloudCasaEndpoint(this.$store);
     this.mainDashboardLink = 'https://' + endpoint.replace('api/v1/', '');
 
-    const restoresData = await this.getCloudCasaRestoresData(
-      this.cloudCasaClusterId,
-    );
-    const backupData = await this.getCloudCasaBackupData(this.cloudCasaClusterId);
-    const migrationData = await this.getCloudCasaMigrationData(
-      this.cloudCasaClusterId
-    );
-    const replicationData = await this.getCloudCasaReplicationData(
-      this.cloudCasaClusterId
-    );
-    const recoveryData = await this.getCloudCasaRecoveryPointsData(
-      this.cloudCasaClusterId
-    );
-    const activityData = await this.getCloudCasaActivityData(
-      this.cloudCasaClusterId
-    );
+    await this.getAllClusterDetailData();
   },
   computed: {
     getBackupData(){
@@ -311,8 +297,29 @@ export default {
     },
   },
   methods: {
-    handlePaginationChanged(test){
-      console.log('TEST');
+    async getAllClusterDetailData(){
+      //Reset table data arrays in case this is a refresh
+      this.tableData = [];
+      this.restoresTableData = [];
+      this.activityTableData = [];
+      this.recoveryPointsTableData = [];
+
+      const restoresData = await this.getCloudCasaRestoresData(
+        this.cloudCasaClusterId,
+      );
+      const backupData = await this.getCloudCasaBackupData(this.cloudCasaClusterId);
+      const migrationData = await this.getCloudCasaMigrationData(
+        this.cloudCasaClusterId
+      );
+      const replicationData = await this.getCloudCasaReplicationData(
+        this.cloudCasaClusterId
+      );
+      const recoveryData = await this.getCloudCasaRecoveryPointsData(
+        this.cloudCasaClusterId
+      );
+      const activityData = await this.getCloudCasaActivityData(
+        this.cloudCasaClusterId
+      );
     },
     getBackupsLink(id){
       return this.mainDashboardLink + 'clusters/backups/' + id + 
@@ -594,7 +601,6 @@ export default {
         :table-actions="false"
         :row-actions="false"
         :rowsPerPage="10"
-        @pagination-changed="this.handlePaginationChanged"
       >
         <template #cell:lastThreeRuns="{ row }">
           <LastThreeRuns :jobs="row.lastThreeRuns" />
