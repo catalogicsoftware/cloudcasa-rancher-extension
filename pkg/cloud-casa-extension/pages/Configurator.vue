@@ -32,6 +32,7 @@ export default defineComponent({
     return {
       cloudCasaApiEndpoint: 'home.cloudcasa.io/api/v1/',
       cloudCasaApiKey: '',
+      isCloudCasaApiKeyValid: false,
       doesAPiKeyExist: false,
     }
   },
@@ -209,6 +210,22 @@ export default defineComponent({
     },
     routeToMainPage(){
       this.$router.push('/' + PRODUCT_NAME + '/dashboard');
+    },
+    validateCloudCasaApiKeyInput() {
+      //Wait for input to update before testing it
+      setTimeout(() => {
+        const regex = /^[a-zA-Z0-9-_]+$/;
+        if (!regex.test(this.cloudCasaApiKey)) {
+          this.isCloudCasaApiKeyValid = false;
+        } else if (
+          this.cloudCasaApiKey.length < 100 || 
+          this.cloudCasaApiKey.length > 255
+        ){ 
+          this.isCloudCasaApiKeyValid = false;
+        } else {
+          this.isCloudCasaApiKeyValid = true;
+        }
+      }, 1000);
     }
   },
 })
@@ -254,8 +271,10 @@ export default defineComponent({
             <div class="m-50"></div>
             <LabeledInput 
               class="key-input"
-              type="text" 
+              type="text"
+              :status="this.isCloudCasaApiKeyValid ? '' : 'error'"
               v-model:value="cloudCasaApiKey"
+              @input="validateCloudCasaApiKeyInput"
               required
             >
               <template #label>CloudCasa API Key</template>
@@ -263,6 +282,7 @@ export default defineComponent({
             <button
               class="btn role-primary btn-save-api-key"
               @click="saveApiInformation()"
+              :disabled="!this.isCloudCasaApiKeyValid"
             >
               Save API Configuration
             </button>
