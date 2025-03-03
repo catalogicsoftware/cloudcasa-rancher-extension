@@ -489,7 +489,7 @@ export default {
     async getCloudCasaActivityData(cloudCasaClusterId){
       let networkRequest = await getCloudCasaRequest(this.$store);
       networkRequest.method = 'GET';
-      networkRequest.url = networkRequest.url + `jobs?sort=-start_time&embedded={"backupdef":1, "restoredef":1, "awsrds.copydef":1}&where={"display_type":{"$nin":["AWSRDS_BACKUP_DELETE","AZURE_METRICS_UPDATE","AGENT_UPDATE"],"$exists":true},"cluster":"${this.cloudCasaClusterId}"}`
+      networkRequest.url = networkRequest.url + `jobs?sort=-start_time&embedded={"backupdef":1, "restoredef":1, "awsrds.copydef":1}&where={"display_type":{"$nin":["AWSRDS_BACKUP_DELETE","AZURE_METRICS_UPDATE","AGENT_UPDATE","DELETE_BACKUP"],"$exists":true},"cluster":"${this.cloudCasaClusterId}"}`
 
       const cloudCasaActivityData = await this.$store.dispatch(
         'management/request', 
@@ -537,7 +537,7 @@ export default {
       }
     },
     msToTime(duration){
-      if (duration < 60000 || isNaN(duration)){
+      if (duration < 1000 || isNaN(duration)){
         return '-';  
       }
 
