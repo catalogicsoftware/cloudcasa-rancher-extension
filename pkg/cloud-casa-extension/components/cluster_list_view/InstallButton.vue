@@ -53,7 +53,13 @@ export default {
             this.localSetInstallState(3)
             clearInterval(this.ccWaitTimer)
           }
-        });
+        }).catch(function(error){
+          this.$store.dispatch('growl/error', {
+            title: 'Something Went Wrong',
+            message: `CloudCasa could not be reached, this was likely do a 
+            network issue.`,
+          }, { root: true });
+        }.bind(this));
       }, 10000)
     },
     beforeDestroy() {
@@ -95,6 +101,11 @@ export default {
       ).catch(function(error){
         console.log("Failed to create CC cluster:", error);
         this.localSetInstallState(1);
+        this.$store.dispatch('growl/error', {
+          title: 'Something Went Wrong',
+          message: `Failed to register cluster with CloudCasa, this is most 
+          likely due to a duplicate cluster name. Check the console for details.`,
+        }, { root: true });
       }.bind(this));
     },
 
@@ -119,6 +130,11 @@ export default {
       }).catch(function(error){
         console.log('Did not find cluster in CloudCasa', error);
         this.localSetInstallState(1);
+        this.$store.dispatch('growl/error', {
+          title: 'Something Went Wrong',
+          message: `The cluster was not found within CloudCasa, ensure it is 
+          registered or restart the install process.`,
+        }, { root: true });
       }.bind(this));
     },
     async installCloudCasaAgent(clusterId, cloudCasaId, agentURL){
@@ -153,6 +169,11 @@ export default {
       }).catch(function(error){
         console.log('Failed to get CC config file:', error);
         this.localSetInstallState(4);
+        this.$store.dispatch('growl/error', {
+          title: 'Something Went Wrong',
+          message: `The CloudCasa agent could not be installed on the cluster.
+          Ensure the cluster is online.`,
+        }, { root: true });
       }.bind(this));
     },
     async uninstallCloudCasaAgent(){
