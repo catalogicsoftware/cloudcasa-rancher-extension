@@ -510,7 +510,7 @@ export default {
         let rawDuration = cloudCasaActivityData._items[i].end_time - 
           cloudCasaActivityData._items[i].start_time;
         
-        let parsedDuration = this.msToTime(rawDuration);
+        let parsedDuration = this.unixToTime(rawDuration);
 
         let newJobset = new Object;
         newJobset.id = cloudCasaActivityData._items[i]._id;
@@ -536,21 +536,16 @@ export default {
         return 'No Date Available';
       }
     },
-    msToTime(duration){
-      if (duration < 1000 || isNaN(duration)){
+    unixToTime(duration){
+      if (isNaN(duration)){
         return '-';  
       }
 
-      var milliseconds = Math.floor((duration % 1000) / 100),
-        seconds = Math.floor((duration / 1000) % 60),
-        minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+      const hours = Math.floor(duration / 3600);
+      const minutes = Math.floor((duration % 3600) / 60);
+      const seconds = duration % 60;
 
-      hours = (hours < 10) ? "0" + hours : hours;
-      minutes = (minutes < 10) ? "0" + minutes : minutes;
-      seconds = (seconds < 10) ? "0" + seconds : seconds;
-
-      return hours + "h " + minutes + "m";
+      return hours + "h " + minutes + "m " + seconds + " s";
     },
     //Used for backups, migrations, and replications
     parseCloudCasaJobData(type, rawData){
