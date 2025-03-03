@@ -253,8 +253,32 @@ export default defineComponent({
             <h1>Welcome to the CloudCasa Extension!</h1>
             <h3>In order to get started you will need a CloudCasa API Key. To set 
               that up follow 
-              <a href="https://docs.cloudcasa.io/help/apikeys.html">this guide</a>.
+              <a 
+                href="https://docs.cloudcasa.io/help/apikeys.html"
+                target="_Blank"
+              >
+                this guide
+              </a>.
             </h3>
+            <div class="m-25"></div>
+            <h1>Documentation & Help</h1>
+            <a 
+              href="https://docs.cloudcasa.io/help/rancher-installation.html"
+              target="_Blank"
+            >
+              Rancher Extension CloudCasa Installation Guide
+            </a>
+            <div class="m-25"></div>
+            <a 
+              href="https://docs.cloudcasa.io/help/rancher.html" 
+              target="_Blank"
+            >
+              Rancher Extension CloudCasa User Guide
+            </a>
+            <div class="m-25"></div>
+            <a href="https://docs.cloudcasa.io/help/" target="_Blank">
+              CloudCasa Help
+            </a>
           </SimpleBox>
         </div>
         <div class="flex-item">
