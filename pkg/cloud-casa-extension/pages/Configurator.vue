@@ -260,7 +260,7 @@ export default defineComponent({
         <div class="flex-item">
           <SimpleBox class="simplebox-centering">
              <LabeledInput 
-              subLabel="The default api endpoint is 'api.cloudcasa.io/api/v1/'. For private CloudCasa instances replace the default api endpoint."
+              subLabel="The default api endpoint is 'home.cloudcasa.io/api/v1/'. For private CloudCasa instances replace the default api endpoint."
               class="key-input"
               type="text" 
               v-model:value="cloudCasaApiEndpoint"
@@ -273,12 +273,14 @@ export default defineComponent({
               class="key-input"
               type="text"
               :status="this.isCloudCasaApiKeyValid ? '' : 'error'"
+              :subLabel="this.isCloudCasaApiKeyValid ? '' : 'Ensure the API Key is in the correct format.'"
               v-model:value="cloudCasaApiKey"
               @input="validateCloudCasaApiKeyInput"
               required
             >
               <template #label>CloudCasa API Key</template>
             </LabeledInput>
+            <div class="m-25"></div>
             <button
               class="btn role-primary btn-save-api-key"
               @click="saveApiInformation()"
