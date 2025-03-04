@@ -1,7 +1,7 @@
 {
   "name": "cloud-casa-extension",
   "description": "CloudCasa One-Click Installation and Monitoring for Rancher Clusters.",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "rancher": {
     "annotations": {
       "catalog.cattle.io/display-name": "CloudCasa",

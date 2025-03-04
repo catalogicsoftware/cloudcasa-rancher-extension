@@ -30,6 +30,7 @@ export default defineComponent({
   },
   data() {
     return {
+      clusterPrefix: '',
       cloudCasaApiEndpoint: 'home.cloudcasa.io/api/v1/',
       cloudCasaApiKey: '',
       isCloudCasaApiKeyValid: false,
@@ -40,6 +41,12 @@ export default defineComponent({
     await this.findCloudCasaApiKey().catch(function(error){
       console.log(error);
     });
+
+    const existingConfig = await this.findCrd();
+    if (existingConfig.length > 0){
+      this.clusterPrefix = existingConfig[0].spec.clusterPrefix;
+      this.cloudCasaApiEndpoint = existingConfig[0].spec.apiEndpoint;
+    }
   },
   methods: {
     async findCloudCasaApiKey(){
@@ -50,15 +57,17 @@ export default defineComponent({
       else
         this.doesAPiKeyExist = false;
     },
-    async findExistingConfig(){
-      let currentConfig;
-
-      const findExistingConfig = await this.$store.dispatch(
+    async findCrd(){
+      return await this.$store.dispatch(
         'management/findAll', 
         { type: CRD_NAME },
       ).catch(function(error){
         console.log(error);
       });
+    },
+    async findExistingConfig(){
+      let currentConfig;
+      const findExistingConfig = await this.findCrd();
 
       //If no config found, create a new one locally
       if (findExistingConfig.length == 0) {
@@ -69,6 +78,7 @@ export default defineComponent({
             namespace: 'default',
           },
           spec: {
+            clusterPrefix: this.clusterPrefix.toLowerCase(),
             apiEndpoint: this.cloudCasaApiEndpoint,
             apiToken: this.cloudCasaApiKey
           },
@@ -79,6 +89,7 @@ export default defineComponent({
       //If config exists, update key
       }else{
         currentConfig = findExistingConfig[0];
+        currentConfig.spec.clusterPrefix = this.clusterPrefix.toLowerCase();
         currentConfig.spec.apiToken = this.cloudCasaApiKey;
         currentConfig.spec.apiEndpoint = this.cloudCasaApiEndpoint;
       }
@@ -304,7 +315,17 @@ export default defineComponent({
             >
               <template #label>CloudCasa API Key</template>
             </LabeledInput>
-            <div class="m-25"></div>
+            <div class="m-35"></div>
+             <LabeledInput 
+              subLabel="This value will be combined with the cluster name to create a cluster entry in CloudCasa. This field is optional."
+              class="key-input"
+              type="text" 
+              v-model:value="clusterPrefix"
+              required
+            >
+              <template #label>Cluster Prefix</template>
+            </LabeledInput>
+            <div class="m-50"></div>
             <button
               class="btn role-primary btn-save-api-key"
               @click="saveApiInformation()"
@@ -339,9 +360,10 @@ export default defineComponent({
   }
 
   .simplebox-centering{
-    height: 45vh;
+    height: 60vh;
     margin: 1rem;
-    display: flex; 
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
   }

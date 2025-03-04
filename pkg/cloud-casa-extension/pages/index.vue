@@ -15,9 +15,9 @@ export default defineComponent({
       CC_CRD: {
         apiVersion: 'apiextensions.k8s.io/v1',
         kind: 'CustomResourceDefinition',
-        metadata: { name: 'configurations.cloudcasa.rancher.io.v2' },
+        metadata: { name: 'configurations.cloudcasa.rancher.io.v3' },
         spec: {
-          group: 'cloudcasa.rancher.io.v2',
+          group: 'cloudcasa.rancher.io.v3',
           versions: [
             {
               name: 'v1beta1',
@@ -30,6 +30,7 @@ export default defineComponent({
                     spec: {
                       type: 'object',
                       properties: {
+                        clusterPrefix: { type: 'string' },
                         apiEndpoint: { type: 'string' },
                         apiToken: { type: 'string' },
                       },

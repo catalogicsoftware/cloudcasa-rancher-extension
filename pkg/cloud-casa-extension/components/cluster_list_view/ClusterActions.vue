@@ -1,7 +1,7 @@
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
-import { CLOUDCASA_URL } from './../../types/types.js';
+import { CLOUDCASA_URL, CRD_NAME } from './../../types/types.js';
 
 import { 
   getCloudCasaApiKey, 
@@ -86,12 +86,25 @@ export default {
       );
     },
     async registerClusterOnCloudCasa(clusterId, clusterName){
+      const findExistingConfig = await this.$store.dispatch(
+        'management/findAll', 
+        { type: CRD_NAME },
+      ).catch(function(error){
+        console.log(error);
+      });
+
+      let clusterPrefix = findExistingConfig[0].spec.clusterPrefix;
+
+      if (clusterPrefix.length > 0) {
+        clusterPrefix = clusterPrefix + '-';
+      }
+
       let networkRequest = await getCloudCasaRequest(this.$store);
       networkRequest.method = 'POST';
       networkRequest.url = networkRequest.url + 'kubeclusters';
       networkRequest.data = {
-        "name": clusterName,
-        "description": "Cluster setup with the CloudCasa Rancher Extension.",
+        'name': clusterPrefix + clusterName,
+        'description': 'Cluster setup with the CloudCasa Rancher Extension.',
       };
 
       return await this.$store.dispatch(
