@@ -248,7 +248,7 @@ export default defineComponent({
               class="btn role-primary reconfigure-button" 
               label="Open CloudCasa"
              >
-              Reconfigure API Key <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
+              Reconfigure Extension <FontAwesomeIcon style="margin-left: 10px;" :icon="faGear" />
             </a>
             <DashboardButton 
               :dashboardName="this.dashboardName"
