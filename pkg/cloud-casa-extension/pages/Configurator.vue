@@ -11,6 +11,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { CLOUDCASA_URL, PRODUCT_NAME, CRD_NAME } from './../types/types.js';
 
 import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { isDarkTheme } from './../modules/cookies.js';
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
@@ -36,6 +37,11 @@ export default defineComponent({
       isCloudCasaApiKeyValid: false,
       doesAPiKeyExist: false,
     }
+  },
+  computed: {
+    isDarkTheme(){
+      return isDarkTheme();
+    },
   },
   async mounted() {
     await this.findCloudCasaApiKey().catch(function(error){
@@ -260,7 +266,16 @@ export default defineComponent({
       <div class="flex-box">
         <div class="flex-item">
           <SimpleBox class="simplebox-centering" style="text-align: center;">
-            <img src="https://cloudcasa.io/assets/logo-white-1.png" />
+            <img
+              v-if="this.isDarkTheme"
+              style="width: 250px;"
+              src="../assets/full-logo-white.png" 
+            />
+            <img
+              v-if="!this.isDarkTheme"
+              style="width: 250px;"
+              src="../assets/full-logo-black.svg" 
+            />
             <h1>Welcome to the CloudCasa Extension!</h1>
             <h3>In order to get started you will need a CloudCasa API Key. To set 
               that up follow 

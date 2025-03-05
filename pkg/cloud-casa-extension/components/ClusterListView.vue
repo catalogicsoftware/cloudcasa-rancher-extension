@@ -17,6 +17,7 @@ import {
   getCloudCasaRequest, 
   getCloudCasaEndpoint,
 } from './../modules/network.js';
+import { isDarkTheme } from './../modules/cookies.js';
 
 export default defineComponent({
   layout: 'plain',
@@ -87,6 +88,11 @@ export default defineComponent({
       cloudCasaApiKey: '',
       loadingClusters: false,
     };
+  },
+  computed: {
+    isDarkTheme(){
+      return isDarkTheme();
+    },
   },
   async mounted() {
     let endpoint = await getCloudCasaEndpoint(this.$store);
@@ -226,9 +232,15 @@ export default defineComponent({
     <div class="max-width">
       <div class="main-spacing">
         <div style="text-align: center;">
-          <img 
+          <img
+            v-if="this.isDarkTheme"
             style="width: 250px;"
-            src="https://cloudcasa.io/assets/logo-white-1.png" 
+            src="../assets/full-logo-white.png" 
+          />
+          <img
+            v-if="!this.isDarkTheme"
+            style="width: 250px;"
+            src="../assets/full-logo-black.svg" 
           />
         </div>
         <div class="m-20"></div>
