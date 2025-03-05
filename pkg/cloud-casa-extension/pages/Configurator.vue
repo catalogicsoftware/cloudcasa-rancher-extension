@@ -45,7 +45,7 @@ export default defineComponent({
   },
   async mounted() {
     await this.findCloudCasaApiKey().catch(function(error){
-      console.log(error);
+      //console.log(error);
     });
 
     const existingConfig = await this.findCrd();
@@ -68,7 +68,7 @@ export default defineComponent({
         'management/findAll', 
         { type: CRD_NAME },
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
     },
     async findExistingConfig(){
@@ -139,7 +139,7 @@ export default defineComponent({
           this.$router.push('/' + PRODUCT_NAME + '/dashboard');
         //If something is wrong with the key, show the growl
         }).catch(function(error){
-          console.log(error);
+          //console.log(error);
           this.$store.dispatch('growl/error', {
             title: 'Invalid API Key',
             message: `Please ensure you have copied the CloudCasa API Key into 
@@ -148,7 +148,7 @@ export default defineComponent({
         }.bind(this));
       //If something is wrong with the key, show the growl
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Invalid API Key',
           message: `Please ensure you have copied the CloudCasa API Key into 
@@ -172,7 +172,7 @@ export default defineComponent({
         await nodeDriver.whitelistDomains.push(url);
         return true;
       } catch(error) {
-        console.log(error);
+        //console.log(error);
         return false;
       }
 
@@ -184,7 +184,7 @@ export default defineComponent({
         { type: 'nodeDriver' },
         { root: true }
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
 
       const cloudCasaDriver = nodeDrivers.find(
@@ -210,7 +210,7 @@ export default defineComponent({
       try {
         return await cloudCasaDriver.save();
       } catch(error) {
-        console.log(error);
+        //console.log(error);
         return false;
       }
     },

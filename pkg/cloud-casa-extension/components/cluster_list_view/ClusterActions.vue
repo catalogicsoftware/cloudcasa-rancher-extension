@@ -90,7 +90,7 @@ export default {
         'management/findAll', 
         { type: CRD_NAME },
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
 
       let clusterPrefix = findExistingConfig[0].spec.clusterPrefix;
@@ -112,7 +112,7 @@ export default {
         networkRequest, 
         { root: true },
       ).catch(function(error){
-        console.log("Failed to create CC cluster:", error);
+        //console.log("Failed to create CC cluster:", error);
         this.localSetInstallState(1);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
@@ -141,7 +141,7 @@ export default {
           clusterObject.status.agentURL,
         );
       }).catch(function(error){
-        console.log('Did not find cluster in CloudCasa', error);
+        //console.log('Did not find cluster in CloudCasa', error);
         this.localSetInstallState(1);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
@@ -180,7 +180,7 @@ export default {
             }
           });
       }).catch(function(error){
-        console.log('Failed to get CC config file:', error);
+        //console.log('Failed to get CC config file:', error);
         this.localSetInstallState(4);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
@@ -200,7 +200,7 @@ export default {
         }, { root: true });
         this.localSetInstallState(0);
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `The CloudCasa Agent was not removed, make sure it still exists.`,

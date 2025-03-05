@@ -54,7 +54,7 @@ export default defineComponent({
   async mounted() {
     //Check for CloudCasa Key
     const apiKeyResponse = await this.testGetCcCrd().catch(function(error){
-      console.log(error);
+      //console.log(error);
     });
    
     //Key exists, show cluster list
@@ -80,7 +80,7 @@ export default defineComponent({
           method: 'POST',
           data:   this.CC_CRD,
         }).catch(function(error){
-          console.log(error);
+          //console.log(error);
         });
         return [];
       }
@@ -90,7 +90,7 @@ export default defineComponent({
         'management/findAll', 
         { type: CRD_NAME },
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
     },
   },
