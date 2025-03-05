@@ -106,7 +106,7 @@ export default {
         }, { root: true });
         this.dataRefreshed = true;
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Error',
           message: `Something went wrong refreshing the data, refresh the page.`,
@@ -152,7 +152,7 @@ export default {
       ).then(function(response){
         this.clusterCloudCasaData = response;
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Unable to fetch connection data, ensure your API Key 

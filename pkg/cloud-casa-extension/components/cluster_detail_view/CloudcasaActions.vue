@@ -123,7 +123,7 @@ export default {
           message: `A backup has been successfully ${phrase}.`,
         }, { root: true });
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `Failed to pause the backup policy`,

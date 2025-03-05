@@ -33,7 +33,7 @@ export function init($plugin: IPlugin, store: any) {
 
   product({
     name: `${YOUR_PRODUCT_NAME}`,
-    svg: require('./logo.svg'),
+    svg: require('./assets/logo.svg'),
     inStore: 'management',
     weight: 100,
     showClusterSwitcher: false,

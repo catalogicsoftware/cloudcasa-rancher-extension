@@ -11,6 +11,7 @@ import { LabeledInput } from '@components/Form/LabeledInput';
 import { CLOUDCASA_URL, PRODUCT_NAME, CRD_NAME } from './../types/types.js';
 
 import { getCloudCasaRequest, getCloudCasaApiKey } from './../modules/network.js';
+import { isDarkTheme } from './../modules/cookies.js';
 
 export default defineComponent({
   layout: 'plain', /*This is going to be deprecated in the future, when it breaks
@@ -37,9 +38,14 @@ export default defineComponent({
       doesAPiKeyExist: false,
     }
   },
+  computed: {
+    isDarkTheme(){
+      return isDarkTheme();
+    },
+  },
   async mounted() {
     await this.findCloudCasaApiKey().catch(function(error){
-      console.log(error);
+      //console.log(error);
     });
 
     const existingConfig = await this.findCrd();
@@ -62,7 +68,7 @@ export default defineComponent({
         'management/findAll', 
         { type: CRD_NAME },
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
     },
     async findExistingConfig(){
@@ -133,7 +139,7 @@ export default defineComponent({
           this.$router.push('/' + PRODUCT_NAME + '/dashboard');
         //If something is wrong with the key, show the growl
         }).catch(function(error){
-          console.log(error);
+          //console.log(error);
           this.$store.dispatch('growl/error', {
             title: 'Invalid API Key',
             message: `Please ensure you have copied the CloudCasa API Key into 
@@ -142,7 +148,7 @@ export default defineComponent({
         }.bind(this));
       //If something is wrong with the key, show the growl
       }.bind(this)).catch(function(error){
-        console.log(error);
+        //console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Invalid API Key',
           message: `Please ensure you have copied the CloudCasa API Key into 
@@ -166,7 +172,7 @@ export default defineComponent({
         await nodeDriver.whitelistDomains.push(url);
         return true;
       } catch(error) {
-        console.log(error);
+        //console.log(error);
         return false;
       }
 
@@ -178,7 +184,7 @@ export default defineComponent({
         { type: 'nodeDriver' },
         { root: true }
       ).catch(function(error){
-        console.log(error);
+        //console.log(error);
       });
 
       const cloudCasaDriver = nodeDrivers.find(
@@ -204,7 +210,7 @@ export default defineComponent({
       try {
         return await cloudCasaDriver.save();
       } catch(error) {
-        console.log(error);
+        //console.log(error);
         return false;
       }
     },
@@ -260,7 +266,16 @@ export default defineComponent({
       <div class="flex-box">
         <div class="flex-item">
           <SimpleBox class="simplebox-centering" style="text-align: center;">
-            <img src="https://cloudcasa.io/assets/logo-white-1.png" />
+            <img
+              v-if="this.isDarkTheme"
+              style="width: 250px;"
+              src="../assets/full-logo-white.png" 
+            />
+            <img
+              v-if="!this.isDarkTheme"
+              style="width: 250px;"
+              src="../assets/full-logo-black.svg" 
+            />
             <h1>Welcome to the CloudCasa Extension!</h1>
             <h3>In order to get started you will need a CloudCasa API Key. To set 
               that up follow 

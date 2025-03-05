@@ -1,7 +1,7 @@
 {
   "name": "cloud-casa-extension",
   "description": "CloudCasa One-Click Installation and Monitoring for Rancher Clusters.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "rancher": {
     "annotations": {
       "catalog.cattle.io/display-name": "CloudCasa",
@@ -9,7 +9,7 @@
       "catalog.cattle.io/ui-extensions-version": ">= 3.0.0 < 4.0.0"
     }
   },
-  "icon": "https://raw.githubusercontent.com/catalogicsoftware/cloudcasa-rancher-extension/refs/heads/main/pkg/cloud-casa-extension/icon.svg",
+  "icon": "https://raw.githubusercontent.com/catalogicsoftware/cloudcasa-rancher-extension/refs/heads/main/pkg/cloud-casa-extension/assets/icon.svg",
   "private": false,
   "scripts": {},
   "engines": {
