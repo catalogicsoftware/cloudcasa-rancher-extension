@@ -11,6 +11,7 @@ export default {
   name: 'cloud-casa-actions',
   props: {
     backupId: String,
+    policy: String,
     copyDef: String,
     etag: String,
     pause: Boolean,
@@ -33,9 +34,11 @@ export default {
   computed: {
     getDropdownOptions(){
       if (this.localPause) {
-        return ['Start Backup', 'Resume Backup', 'Restore', 'Edit']
+        return ['Start Backup', 'Resume Backup Schedule', 'Restore', 'Edit']
+      }else if (this.policy.length == 0) {
+        return ['Start Backup', 'Restore', 'Edit']
       }else{
-        return ['Start Backup', 'Pause Backup', 'Restore', 'Edit']
+        return ['Start Backup', 'Pause Backup Schedule', 'Restore', 'Edit']
       }
     }
   },
@@ -45,10 +48,10 @@ export default {
         case 'Start Backup':
           this.startBackup();
           break;
-        case 'Pause Backup':
+        case 'Pause Schedule':
           this.resumePauseBackup();    
           break;
-        case 'Resume Backup':
+        case 'Resume Schedule':
           this.resumePauseBackup();    
           break;
         case 'Restore':

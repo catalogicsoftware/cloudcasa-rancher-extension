@@ -18,13 +18,21 @@ Key Features of the Current Release:
 
 # Installation
 
+**Note that you only need to enable the Rancher Partner Extensions Repository or Manually add the repository. Doing both will cause conflicts and the extension may not work as intended.**
+
 ## Prerequisites
 
 1) Ensure you are running Rancher version 2.10.0 or later.
 2) Ensure you have access to an admin user.
 3) You must have a CloudCasa account or a self-hosted installation.
 
-## Instructions
+## Rancher Partner Extension Repository Instructions
+1) Log into the destination Rancher Management Server dashboard.
+2) From the Rancher Dashboard, open the hamburger menu in the top left corner and select "Extensions."
+3) If the Partner Extension Repository is not enabled there will be a prompt at the top of the page that will say "There are new extensions repositories available. To enable these repositories, click the button on the right."
+4) After adding the repository the CloudCasa Rancher Extension will be available to install. 
+
+## Manual Instructions
 
 1) Log into the destination Rancher Management Server dashboard.
 2) From the Rancher Dashboard, open the hamburger menu in the top left corner and select "Extensions."
