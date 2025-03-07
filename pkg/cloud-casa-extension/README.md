@@ -7,10 +7,9 @@ Key Features of the Current Release:
 3) **One-Click Installation of CloudCasa Agent:** Simplify the deployment process with our one-click installation feature, allowing for rapid integration of the CloudCasa agent into your cluster.
 4) **Cluster Detail Page:** View recent CloudCasa jobs, check coverage status, and quickly navigate to CloudCasa cluster pages.
 
-
 <p align="middle">
-   <img src="https://github.com/user-attachments/assets/48b1fda8-cd40-4831-9179-876bccd01c5c" />
-   <img src="https://github.com/user-attachments/assets/47a79e5b-ecb5-46c1-bb7c-5113847c5ece" />
+   <img src="https://github.com/user-attachments/assets/357760fa-86e2-415f-8081-45b028e35eb2" />
+   <img src="https://github.com/user-attachments/assets/e6d4ee74-aa76-4505-bff5-461590407c85" />
 </p>
 
 ## Installation
