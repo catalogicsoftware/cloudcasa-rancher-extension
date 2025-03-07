@@ -609,6 +609,7 @@ export default {
           <CloudcasaActions 
             :backupId="row.id" 
             :copyDef="row.copyDef"
+            :policy="row.policy"
             :etag="row.etag"
             :pause="row.pause"
           />
