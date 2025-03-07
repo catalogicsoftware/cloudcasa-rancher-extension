@@ -12,10 +12,15 @@ Key Features of the Current Release:
    <img src="https://github.com/user-attachments/assets/47a79e5b-ecb5-46c1-bb7c-5113847c5ece" />
 </p>
 
-## Installation
-
-### Prerequisites
+## Prerequisites
 1) Ensure you are running the Rancher version 2.10.0 or later.
 2) Ensure you have access to an admin user. 
 3) You must have a CloudCasa account or a self-hosted installation.
-4) Ensure you have the Rancher Partner Extension repository enabled.
+
+## Support
+
+For support, please open an issue in this repository or [Contact CloudCasa](https://cloudcasa.io/contact-us/).
+
+## GitHub Repository
+
+https://github.com/catalogicsoftware/cloudcasa-rancher-extension
