@@ -18,6 +18,7 @@ export default {
   </div>
   <BadgeState v-if="installState === 3" color="bg-success" label="Active" />
   <BadgeState v-if="installState === 4" color="bg-error" label="Failed" />
+  <BadgeState v-if="installState === 5" color="bg-disabled" label="Updating..." />
 </template>
 <style scoped>
   .bg-disabled{

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import DashboardButton from './DashboardButton.vue';
+import AgentVersion from './AgentVersion.vue';
 import JobsTable from './cluster_detail_view/JobsTable.vue';
 import CoverageCards from './cluster_detail_view/CoverageCards.vue';
 
@@ -20,6 +21,7 @@ import {
   getCloudCasaApiKey,
   getCloudCasaEndpoint,
 } from './../modules/network.js';
+import { getAgentVersion, getNewAgentVersion } from './../modules/cloudcasaAgent.js';
 
 const jobsTable = ref(0);
 export default {
@@ -33,6 +35,7 @@ export default {
     SortableTable,
     Tabbed,
     Tab,
+    AgentVersion,
   },
   setup(){
     return {
@@ -49,6 +52,8 @@ export default {
       clusterCloudCasaData: null,
       mainDashboardLink: '',
       dataRefreshed: true,
+      agentVersion: '',
+      newAgentVersion: '',
     }
   },
   async mounted() {
@@ -64,6 +69,12 @@ export default {
       );
       await this.getCloudCasaData(this.clusterId);
     }
+    this.agentVersion = await getAgentVersion(this.$store, this.clusterId);
+    this.newAgentVersion = await getNewAgentVersion(
+      this.$store, 
+      getCloudCasaApiKey(), 
+      this.clusterCloudCasaData.status.agentURL,
+    );
   },
   computed: {
     installState(){
@@ -162,7 +173,7 @@ export default {
     },
     routeToMainPage(){
       this.$router.push('/' + PRODUCT_NAME + '/dashboard');
-    }
+    },
   },
 }
 </script>
@@ -181,7 +192,16 @@ export default {
       <div class="m-25"></div>
       <div class="header">
         <div class="section sub-header">
-          <h1>{{this.clusterName}} (ID: {{this.cloudCasaClusterId}})</h1>
+          <h1>
+            {{this.clusterName}} (ID: {{this.cloudCasaClusterId}}) <br /> 
+            Agent Version:
+            <b v-if="this.clusterCloudCasaData != undefined">
+              <AgentVersion 
+                :agentVersion="this.agentVersion" 
+                :newAgentVersion="this.newAgentVersion" 
+              />
+            </b>
+          </h1>
         </div>
         <div class="section actions">
           <a 

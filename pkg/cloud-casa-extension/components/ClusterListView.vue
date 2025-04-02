@@ -1,6 +1,7 @@
 <script>
 import { defineComponent } from 'vue';
 import DashboardButton from './DashboardButton.vue';
+import AgentVersion from './AgentVersion.vue';
 import ClusterActions from './cluster_list_view/ClusterActions.vue';
 import ClusterState from './cluster_list_view/ClusterState.vue';
 import { CRD_NAME, CLOUDCASA_URL, PRODUCT_NAME } from './../types/types.js';
@@ -10,13 +11,18 @@ import { BadgeState } from '@components/BadgeState';
 import { MANAGEMENT } from '@shell/config/types';
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faTriangleExclamation, faGear } from '@fortawesome/free-solid-svg-icons'
+import { 
+  faArrowRight, 
+  faTriangleExclamation, 
+  faGear,
+} from '@fortawesome/free-solid-svg-icons'
  
 import { 
   getCloudCasaApiKey, 
   getCloudCasaRequest, 
   getCloudCasaEndpoint,
 } from './../modules/network.js';
+import { getAgentVersion, getNewAgentVersion } from './../modules/cloudcasaAgent.js';
 
 export default defineComponent({
   layout: 'plain',
@@ -27,11 +33,13 @@ export default defineComponent({
     ClusterActions,
     ClusterState,
     FontAwesomeIcon,
+    AgentVersion,
   },
   setup() {
     return {
       faTriangleExclamation,
-      faGear
+      faGear,
+      faArrowRight
     }
   },
   data() {
@@ -42,7 +50,7 @@ export default defineComponent({
           name: 'id',
           label: 'Cluster',
           value: 'name',
-          width: '30%',
+          width: '15%',
           sort: [
             "id"
           ]
@@ -60,15 +68,20 @@ export default defineComponent({
           name: 'lastUpdated',
           label: 'Last Updated',
           value: 'lastUpdated',
-          width: '20%',
+          width: '15%',
           sort: [
             "lastUpdated"
           ]
         },
         {
+          name: 'agentVersion',
+          label: 'Agent Version',
+          width: '10%',
+        },
+        {
           name: 'spacing',
           label: ' ',
-          width: '10%',
+          width: '5%',
         },
         {
           name: 'additionalText',
@@ -78,9 +91,8 @@ export default defineComponent({
         {
           name: 'install',
           label: ' ',
-          width: '15%',
+          width: '30%',
         },
-
       ],
       mainDashboardLink: '',
       parsedClusterData: [],
@@ -119,6 +131,7 @@ export default defineComponent({
       newCluster.name = rancherClusterData[i].spec.displayName;
       newCluster.installState = 0;
       newCluster.lastUpdated = "No Date Available"
+      newCluster.agentVersion = await getAgentVersion(this.$store, newCluster.id);
 
       if (rancherClusterData[i].metadata.state.name != "active") {
         continue;
@@ -129,10 +142,10 @@ export default defineComponent({
       );
 
       for (let f = 0; f < rancherClusterServiceData.data.length; f++) {
-
         if (rancherClusterServiceData.data[f].metadata.namespace == 'cloudcasa-io') {
           const kubeAgent = await this.$store.dispatch('cluster/request', {
-            url: `/k8s/clusters/` + newCluster.id + `/v1/apps.deployments/cloudcasa-io/kubeagent`,
+            url: `/k8s/clusters/` + newCluster.id + 
+              `/v1/apps.deployments/cloudcasa-io/kubeagent`,
           });
 
           const envVars = kubeAgent.spec.template.spec.containers[0].env;
@@ -149,12 +162,19 @@ export default defineComponent({
           cloudCasaClusterData, 
           rancherClusterServiceData.data[f],
         );
+        
+        if (newCluster.agentURL != undefined) {
+          newCluster.newAgentVersion = await getNewAgentVersion(
+            this.$store, 
+            this.cloudCasaApiKey, 
+            newCluster.agentURL,
+          );
+        }
 
         if (newCluster.installState == 3) {
           break;
         }
       }
-    
       this.parsedClusterData.push(newCluster);
     }
     this.loadingClusters = false;
@@ -190,8 +210,15 @@ export default defineComponent({
 
       return cloudCasaResponse;
     },
-    setInstallState(value, row){
+    async setInstallState(value, row){
       row.installState = value;
+
+      row.agentVersion = await getAgentVersion(this.$store, row.id);
+      row.newAgentVersion = await getNewAgentVersion(
+        this.$store, 
+        this.cloudCasaApiKey, 
+        row.agentURL,
+      );
     },
     parseNewCluster(newCluster, cloudCasaData, clusterServiceData){
       let index = cloudCasaData._items.findIndex(function(data) {
@@ -205,6 +232,7 @@ export default defineComponent({
       }else{
         newCluster.lastUpdated = cloudCasaData._items[index]._updated
         newCluster.serviceStatus = clusterServiceData.metadata.state.name;
+        newCluster.agentURL = cloudCasaData._items[index].status.agentURL;
 
         if (clusterServiceData.metadata.namespace == 'cloudcasa-io') {
           newCluster.installState = 3;
@@ -271,7 +299,13 @@ export default defineComponent({
               <ClusterState :installState="row.installState" />
             </template>
             <template #cell:serviceStatus="{ row }">
-              {{ row.serviceStatus[0].toUpperCase() + row.serviceStatus.slice(1) }}
+                {{ row.serviceStatus[0].toUpperCase() + row.serviceStatus.slice(1) }}
+            </template>
+            <template #cell:agentVersion="{ row }">
+              <AgentVersion 
+                :agentVersion="row.agentVersion" 
+                :newAgentVersion="row.newAgentVersion" 
+              />
             </template>
             <template #cell:additionalText="{ row }">
               <div class="yellow-text" v-if="row.installState === 4">
@@ -282,7 +316,7 @@ export default defineComponent({
                   </span>
                 </div>
               </div>
-              <div class="green-text" v-if="row.installState === 3">
+              <div class="green-text" style="float: right;" v-if="row.installState === 3">
                 ✔ Installed
               </div>
             </template>

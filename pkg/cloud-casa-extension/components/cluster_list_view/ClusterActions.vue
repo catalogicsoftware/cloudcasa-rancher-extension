@@ -2,12 +2,12 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { CLOUDCASA_URL } from './../../types/types.js';
-
 import { 
   getCloudCasaApiKey, 
   getCloudCasaRequest, 
   getCloudCasaEndpoint,
 } from './../../modules/network.js';
+import { getAgentVersion, getNewAgentVersion } from './../../modules/cloudcasaAgent.js';
 
 export default {
   emits: ['install-state-func'],
@@ -26,14 +26,30 @@ export default {
   data(){
     return {
       ccWaitTimer: null,
+      namespaceDeleteTimer: null,
+      namespaceGetTimer: null,
+      agentVersion: undefined,
+      newAgentVersion: undefined,
     }
+  },
+  async mounted() {
+    this.updateAgentVersion();
   },
   methods: {
     getDetailsLink(clusterId){
       return this.detailsLink + clusterId;
     },
     localSetInstallState(value){
+      console.log(this.row);
       this.$emit("install-state-func", value, this.row);
+    },
+    async updateAgentVersion(){
+      this.agentVersion = await getAgentVersion(this.$store, this.row.id);
+      this.newAgentVersion = await getNewAgentVersion(
+        this.$store, 
+        this.cloudCasaApiKey, 
+        this.row.agentURL,
+      );
     },
     async waitForInstallComplete(cloudCasaId){
       let networkRequest = await getCloudCasaRequest(this.$store);
@@ -48,12 +64,15 @@ export default {
         ).then(clusterObject => {
           let status = clusterObject.status.state;
           
-          if (status == "ACTIVE"){
+          if (status.toLowerCase() == "active"){
+            this.updateAgentVersion();
             this.row.cloudCasaId = cloudCasaId;
-            this.localSetInstallState(3)
-            clearInterval(this.ccWaitTimer)
+            this.localSetInstallState(3);
+            clearInterval(this.ccWaitTimer);
+            clearInterval(this.namespaceDeleteTimer);
           }
         }).catch(function(error){
+          console.log(error);
           this.$store.dispatch('growl/error', {
             title: 'Something Went Wrong',
             message: `CloudCasa could not be reached, this was likely do a 
@@ -64,8 +83,9 @@ export default {
     },
     beforeDestroy() {
       clearInterval(this.ccWaitTimer)
+      clearInterval(this.namespaceDeleteTimer)
+      clearInterval(this.namespaceGetTimer)
     },
-
     //Full install of cloud casa (register + agent install)
     async startCloudCasaInstall(clusterId, clusterName){
       this.localSetInstallState(2);
@@ -176,24 +196,50 @@ export default {
         }, { root: true });
       }.bind(this));
     },
-    async uninstallCloudCasaAgent(){
+    async deleteNamespace(){
       return await this.$store.dispatch('cluster/request', {
         url: `/v1/namespace/cloudcasa-io`,
         method: 'DELETE',
-      }).then(function(){
-        this.$store.dispatch('growl/success', {
-          title: 'Agent Removed',
-          message: `The CloudCasa Agent has been successfully removed.`,
-        }, { root: true });
-        this.localSetInstallState(0);
-      }.bind(this)).catch(function(error){
+      }).catch(function(error){
         console.log(error);
         this.$store.dispatch('growl/error', {
           title: 'Something Went Wrong',
           message: `The CloudCasa Agent was not removed, make sure it still exists.`,
         }, { root: true });
       }.bind(this));
+    },
+    async uninstallCloudCasaAgent(){
+      await this.deleteNamespace().then(function(){
+        this.$store.dispatch('growl/success', {
+          title: 'Agent Removed',
+          message: `The CloudCasa Agent has been successfully removed.`,
+        }, { root: true });
+        this.localSetInstallState(0);
+      }.bind(this));
+    },
+    async reinstallCloudCasaAgent(clusterId, cloudCasaId, agentURL){
+      console.log(this.row);
+      this.localSetInstallState(5);
+     
+      //Remove the agent before attempting a reinstall
+      await this.deleteNamespace();
+      this.localSetInstallState(5);
 
+      //Wait for namespace to not exist
+      this.namespaceDeleteTimer = setInterval(() => {
+        this.$store.dispatch('cluster/request', {
+          url: `/v1/namespace/cloudcasa-io`,
+          method: 'GET',
+        }).catch(function(error){
+          this.installCloudCasaAgent(clusterId, cloudCasaId, agentURL).then(function(){
+            this.$store.dispatch('growl/success', {
+              title: 'Agent Updated',
+              message: `The CloudCasa Agent has been successfully updated...` + 
+                `waiting for agent to come back up.`,
+            }, { root: true });
+          }.bind(this));
+        }.bind(this));
+      }, 3000);
     },
     routeToDetailedPage(id, ccid){
       this.$router.push('/CloudCasa/c/' + id + '/' + ccid);
@@ -203,57 +249,55 @@ export default {
 </script>
 <template>
   <button
-    v-if="row.installState == 2 || row.installState == 0"
-    v-bind="{disabled: row.installState == 2 ? true : null}"
+    v-if="row.installState == 1"
     class="btn role-primary" 
-    @click="startCloudCasaInstall(row.id, row.name)"
+    @click="beginCloudCasaAgentInstall(row.cloudCasaId)"
+    style="float: left; margin-left: 5px;"
   >
     <span>
       Install <FontAwesomeIcon v-if="row.installState === 2" :icon="faSpinner" spin />
     </span>
   </button>
   <button
-    v-if="row.installState == 1"
+    v-if="row.installState == 2 || row.installState == 0"
+    v-bind="{disabled: row.installState == 2 ? true : null}"
     class="btn role-primary" 
-    @click="beginCloudCasaAgentInstall(row.cloudCasaId)"
+    @click="startCloudCasaInstall(row.id, row.name)"
+    style="float: left; margin-left: 5px;"
   >
     <span>
       Install <FontAwesomeIcon v-if="row.installState === 2" :icon="faSpinner" spin />
     </span>
   </button>
-  <div v-if="row.installState === 3">
-    <a
-      @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
-      class="btn role-secondary"
-      
-    >
-      View Details
-    </a>
-    <button
-      class="btn role-primary" 
-      @click="uninstallCloudCasaAgent(row.cloudCasaId)"
-    >
-      <span>
-        Uninstall
-      </span>
-    </button>
-  </div>
-  <div v-if="row.installState === 4">
-    <a
-      @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
-      class="btn role-secondary"
-    >
-      View Details
-    </a>
-    <button
-      class="btn role-primary" 
-      @click="uninstallCloudCasaAgent(row.cloudCasaId)"
-    >
-      <span>
-        Uninstall
-      </span>
-    </button>
-  </div>
+  <a
+    v-if="row.installState === 3 || row.installState === 4"
+    @click="this.routeToDetailedPage(row.id, row.cloudCasaId)"
+    class="btn role-secondary"
+    style="float: left; margin-left: 5px;"  
+  >
+    View Details
+  </a>
+  <button
+    v-if="row.installState === 3 || row.installState === 4"
+    class="btn role-primary" 
+    @click="uninstallCloudCasaAgent(row.cloudCasaId)"
+    style="float: left; margin-left: 5px;"
+  >
+    <span>
+      Uninstall
+    </span>
+  </button>
+  <button
+    @click="reinstallCloudCasaAgent(row.id, row.cloudCasaId, row.agentURL)"
+    v-if="this.agentVersion != this.newAgentVersion || row.installState === 5"
+    v-bind="{disabled: row.installState == 5 ? true : null}"
+    class="btn role-primary"
+    style="float: left; margin-left: 5px;"
+  >
+    <span>
+      Update Agent <FontAwesomeIcon v-if="row.installState === 5" :icon="faSpinner" spin />
+    </span>
+  </button>
 </template>
 <style scoped>
 </style>
